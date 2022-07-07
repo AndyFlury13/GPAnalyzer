@@ -1,3 +1,10 @@
+html *
+{
+   font-size: 1em !important;
+   font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif !important;
+}
+
+
 .scroller {
     height: 100vh;
     overflow-y: scroll;
@@ -25,6 +32,23 @@
 #barChartAndButtons {
     grid-column-start: 1;
     grid-column-end: 2;
+    
+}
+
+.monthGraphButtons {
+    display: grid;
+    grid-template-rows: 50% 50%;
+    place-items:  center;
+}
+
+#monthGraphPhotoTakerButton {
+    grid-column-start: 1;
+    grid-column-end: 2;
+}
+
+#monthGraphPhotoSubjectButton {
+    grid-column-start: 2;
+    grid-column-end: 3;
 }
 
 #photoSpread {
@@ -34,4 +58,53 @@
 
 #monthGraphPicture {
     opacity: 0;
+}
+
+.monthGraphButtons > div {
+    text-decoration:none;
+    display: inline-block;
+    opacity: 1;
+    transition: opacity .5s;
+}
+
+/* add a empty string after the elements with class .slide-center-out  */
+.slide-in-out-photoTaker {
+    display: block;
+    height: 3px;
+    width: 0%;
+    background: transparent;
+    transition: width .5s ease, background-color .5s ease;
+    -webkit-transition: width .5s ease, background-color .5s ease;
+    -moz-transition: width .5s ease, background-color .5s ease;
+    
+    margin:auto; /* center the content so it will slide from the midddle to the left and right */
+}
+
+.slide-in-out-subject {
+    display: block;
+    height: 3px;
+    width: 0%;
+    background: transparent;
+    transition: width .5s ease, background-color .5s ease;
+    -webkit-transition: width .5s ease, background-color .5s ease;
+    -moz-transition: width .5s ease, background-color .5s ease;
+    
+    margin:auto; /* center the content so it will slide from the midddle to the left and right */
+}
+ 
+.monthGraphButtons > div:hover {
+    cursor: pointer;
+    opacity: .5;
+}
+
+/* Change the width and background on hover, aka sliding from the middle to the left and right */
+.slide-in-out-photoTaker.slide {
+    width: 100%;
+    background: black;
+}
+
+/* Change the width and background on hover, aka sliding from the middle to the left and right */
+.slide-in-out-subject.slide {
+    width: 100%;
+    background: black;
 }

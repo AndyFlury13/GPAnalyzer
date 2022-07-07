@@ -16,12 +16,16 @@
             <section class="introBlurb">
                 Over your last year in Berkeley you took and uploaded 13 pictures to the Hilledwight album and
                 appeared in 26 pictures.
+                <div class="slide-center-out">test</div>
             </section>
             
             <section class="monthGraph">
                 <div id="barChartAndButtons">
-                    <div onclick="drawBarGraph(CLIENT_NAME,'photoTaker')">As the photographer</div>
-                    <div onclick="drawBarGraph(CLIENT_NAME, 'subject')">As the subject</div>
+                    <div class="monthGraphButtons">
+                        
+                        <div id = 'monthGraphPhotoTakerButton' onclick="drawBarGraph(CLIENT_NAME,'photoTaker')">As the photographer<span class='slide-in-out-photoTaker'></span></div>
+                        <div id = 'monthGraphPhotoSubjectButton' onclick="drawBarGraph(CLIENT_NAME, 'subject')">As the subject<span class='slide-in-out-subject'></span></div>
+                    </div>
                     <div id="my_dataviz"></div>
                 </div>
                 <div id="photoSpread">
@@ -43,6 +47,7 @@
             </section>
         </article>
         <script src="/graphs.js" type="text/javascript"></script>
+        <script src="/credentials.js" type="text/javascript"></script>
         <script src="/auth.js" type="text/javascript"></script>
     </body>
 </html>

@@ -2,6 +2,8 @@ const MONTHS = ['August','September', 'October', 'November', 'December', 'Januar
 const CLIENT_NAME = 'me';
 var USER;
 var TRANSITION_OFF = true;
+var CURRENT_SUBJECT_OR_TAKER = 'photoTaker';
+$(".slide-in-out-photoTaker").toggleClass("slide");
 
 var monthGraphMargin = {top: 30, right: 30, bottom: 70, left: 60},
     width = 600 - monthGraphMargin.left - monthGraphMargin.right,
@@ -34,7 +36,13 @@ var monthGraphYAxis = monthGraphSVG.append("g")
 const aspect = width/height, chart = d3.select('#my_dataviz');
 
 const drawBarGraph = (clientName, subjectOrTaker) => {
-    SUBJECT_OR_TAKER = subjectOrTaker;
+    if (subjectOrTaker != CURRENT_SUBJECT_OR_TAKER) {
+        $(".slide-in-out-photoTaker").toggleClass("slide");
+        $(".slide-in-out-subject").toggleClass("slide");
+        CURRENT_SUBJECT_OR_TAKER = subjectOrTaker;
+    }
+     
+
     d3.csv("/scripts/data/pictureBySubjectByMonth.csv", (asPhotoTakerData) => {
         d3.csv("/scripts/data/pictureOfSubjectByMonth.csv", (asSubjectData) => {
             const clientData = [];

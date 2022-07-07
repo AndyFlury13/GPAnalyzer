@@ -3,7 +3,6 @@
  * See instructions for running APIs Explorer code samples locally:
  * https://developers.google.com/explorer-help/code-samples#javascript
  */
-import { CREDENTIALS } from "./credentials";
 const authenticate = () => {
     return gapi.auth2.getAuthInstance()
         .signIn({scope: "https://www.googleapis.com/auth/photoslibrary https://www.googleapis.com/auth/photoslibrary.readonly https://www.googleapis.com/auth/photoslibrary.readonly.appcreateddata"})

@@ -28,16 +28,16 @@
                 <div class="slide-center-out">test</div>
             </section>
             
-            <section class="monthGraph">
+            <section class="monthSection">
                 <div id="barChartAndButtons">
                     <div class="monthGraphButtons">
                         
                         <div id = 'monthGraphPhotoTakerButton' onclick="drawBarGraph(CLIENT_NAME,'photoTaker')">As the photographer<span class='slide-in-out-photoTaker'></span></div>
                         <div id = 'monthGraphPhotoSubjectButton' onclick="drawBarGraph(CLIENT_NAME, 'subject')">As the subject<span class='slide-in-out-subject'></span></div>
                     </div>
-                    <div id="my_dataviz"></div>
+                    <div id="monthGraph"></div>
                 </div>
-                <div id="photoSpread">
+                <div class="monthPhotos">
                 </div>
             </section>
 
@@ -45,19 +45,21 @@
 
             </section>
 
-            <section class="takerSubjectGraph">
+            <section class="takerSubjectSection">
 
             </section>
-            <section class="picturedWithGraph">
-
+            <section class="picturedWithSection">
+                <div id="picturedWithGraph"></div>
+                <div class="picturedWithPictures"></div>
             </section>
             <section class="totalGraph">
 
             </section>
         </article>
-        <script src="/graphs.js" type="text/javascript"></script>
+        <script src="/monthGraph.js" type="text/javascript"></script>
         <script src="/credentials.js" type="text/javascript"></script>
         <script src="/googleAuth.js" type="text/javascript"></script>
         <script src="/hdAuth.js" type="text/javascript"></script>
+        <script src="/networkGraphs.js" type="text/javascript"></script>
     </body>
 </html>

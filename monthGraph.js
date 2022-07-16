@@ -1,8 +1,10 @@
 const MONTHS = ['August','September', 'October', 'November', 'December', 'January', 'February', 'March', 'April', 'May', 'June'];
-const CLIENT_NAME = 'me';
+const shortenedMonths = ['Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun']
+const CLIENT_NAME = 'bugBoy';
 var USER;
 var CURRENT_SUBJECT_OR_TAKER = 'photoTaker';
 var TRANSITION_OFF = true;
+const IMG_CONTAINER_REF = [];
 $(".slide-in-out-photoTaker").toggleClass("slide");
 
 var monthGraphMargin = {top: 30, right: 30, bottom: 70, left: 60},
@@ -53,7 +55,7 @@ const drawBarGraph = (clientName, subjectOrTaker) => {
                         const s_d = asSubjectData[s_data_i];
                         if (s_d.subject == clientName) {
                             for (let month_i = 0; month_i < MONTHS.length; month_i++) {
-                                clientData.push({'month': MONTHS[month_i], 'photoTaker': pt_d[MONTHS[month_i]], 'subject': s_d[MONTHS[month_i]]});
+                                clientData.push({'month': shortenedMonths[month_i], 'photoTaker': pt_d[MONTHS[month_i]], 'subject': s_d[MONTHS[month_i]]});
                             }
                         }
                     }
@@ -78,18 +80,19 @@ const drawBarGraph = (clientName, subjectOrTaker) => {
             var u = monthGraphSVG.selectAll("rect")
                 .data(clientData);
             const bar_color = "#69b3a2"
-            var imgContainerRef = [null]; // We use a list here only so we can reference an object from deeper scope
-            // var imgTransitionRef = [null];
-            // var imgClearRef = [null];
+            // We use a list here only so we can reference an object from deeper scope
             u
                 .enter()
                 .append("rect")
-                .on("mouseover", (d) => {
-                    loadAndDisplayPictures(d, imgContainerRef);
+                .on("mouseover", (d, i, n) => {
+                    const imgIDs = d[CURRENT_SUBJECT_OR_TAKER].split(",").slice(0, -1);
+                    loadAndDisplayPictures(imgIDs, "monthGraph", "month");
+                    fadeElement(d3.select(n[i]), false)
                 })
-                .on("mouseout", (d) => {
+                .on("mouseout", (_, i, n) => {
                     TRANSITION_OFF = true;
                     console.log('mouseout');
+                    fadeElement(d3.select(n[i]), true)
                 })
                 .merge(u)
                 .transition()
@@ -106,18 +109,16 @@ const drawBarGraph = (clientName, subjectOrTaker) => {
 drawBarGraph(CLIENT_NAME, 'photoTaker');
 
 
-const loadAndDisplayPictures = (d, imgContainerRef) => {
-    console.log('mouse over');
+const loadAndDisplayPictures = (imgIDs, pictureIDName, pictureDivName) => {
     TRANSITION_OFF = false;
-    const imgIDs = d[CURRENT_SUBJECT_OR_TAKER].split(",").slice(0, -1);
     var timer = 0;
     var imgIDs_i = 0;
     return gapi.client.photoslibrary.mediaItems.get({ //initial load
         'mediaItemId':imgIDs[imgIDs_i]
     }).then((response) => {
         var urlToDisplay = response.result.baseUrl;
-        imgContainerRef[0]?.remove();
-        animatePicture(imgContainerRef, urlToDisplay, ".monthPhotos");
+        IMG_CONTAINER_REF[0]?.remove();
+        animatePicture(urlToDisplay, pictureIDName, pictureDivName);
         const imgCycler = setInterval(()=> {
             if (timer > 300) {
                 timer = 0;
@@ -126,25 +127,25 @@ const loadAndDisplayPictures = (d, imgContainerRef) => {
                 if (imgIDs_i == imgIDs.length) {
                     imgIDs_i = 0;
                 }
-                $("#monthGraphPicture").animate({
+                $("#"+pictureIDName + "Photo").animate({
                     opacity: 0
                 }, 400, () => {
-                    imgContainerRef[0].remove();
+                    IMG_CONTAINER_REF[0].remove();
                     gapi.client.photoslibrary.mediaItems.get({ //initial load
                         'mediaItemId':imgIDs[imgIDs_i]
                     }).then((response) => {
                         urlToDisplay = response.result.baseUrl;
-                        animatePicture(imgContainerRef, urlToDisplay, ".monthPhotos");
+                        animatePicture(urlToDisplay, pictureIDName, pictureDivName);
                     }, (err) => {
                         console.err('GP request err:', err);
                     });
                 });
             } else if (TRANSITION_OFF) {
                 clearInterval(imgCycler);
-                $("#monthGraphPicture").animate({
+                $("#"+pictureIDName + "Photo").animate({
                     opacity: 0
                 }, 400, () => {
-                    imgContainerRef[0].remove();
+                    IMG_CONTAINER_REF[0].remove();
                 });
             }
             timer++
@@ -154,10 +155,10 @@ const loadAndDisplayPictures = (d, imgContainerRef) => {
     });
 }
 
-const animatePicture = (imgContainerRef, urlToDisplay, photoDivName) => {
-    imgContainerRef[0] = ($("<img id='monthGraphPicture' src='"+urlToDisplay+"'/>").prependTo(photoDivName));
-    $("#monthGraphPicture").on("load", () => {
-        $("#monthGraphPicture").animate({
+const animatePicture = (urlToDisplay, photoIDName, photoDivName) => {
+    IMG_CONTAINER_REF[0] = ($("<img class='displayedPhoto' id='"+photoIDName+"Photo' src='"+urlToDisplay+"'/>").prependTo("#"+photoDivName + "Photos"));
+    $("#"+photoIDName+"Photo").on("load", () => {
+        $("#"+photoIDName+"Photo").animate({
             opacity: 1
         }, 400);
     });

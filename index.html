@@ -31,14 +31,12 @@
             <section class="monthSection">
                 <div id="barChartAndButtons">
                     <div class="monthGraphButtons">
-                        
                         <div id = 'monthGraphPhotoTakerButton' onclick="drawBarGraph(CLIENT_NAME,'photoTaker')">As the photographer<span class='slide-in-out-photoTaker'></span></div>
                         <div id = 'monthGraphPhotoSubjectButton' onclick="drawBarGraph(CLIENT_NAME, 'subject')">As the subject<span class='slide-in-out-subject'></span></div>
                     </div>
                     <div id="monthGraph"></div>
                 </div>
-                <div class="monthPhotos">
-                </div>
+                <div id="monthPhotos" class="photoContainer"></div>
             </section>
 
             <section class="categoryChart">
@@ -46,11 +44,13 @@
             </section>
 
             <section class="takerSubjectSection">
-
+                <div id="takerSubjectGraph"></div>
+                <div class="photoContainer" id="takerSubjectPhotos"></div>
+                
             </section>
             <section class="picturedWithSection">
+                <div class="photoContainer" id="picturedWithPhotos"></div>
                 <div id="picturedWithGraph"></div>
-                <div class="picturedWithPictures"></div>
             </section>
             <section class="totalGraph">
 

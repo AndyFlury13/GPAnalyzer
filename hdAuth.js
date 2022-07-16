@@ -10,14 +10,14 @@ $('input').on('keypress', async (e) => {
         if (pwd['pwd'].length == 0) {
             return;
         }
-        let response = await fetch(HD_AUTHORIZE_API, {
-            method: 'POST',
-            body: JSON.stringify(pwd)
-          });
-        response
-            .then(response => response.json())
-            .then(data => {
-                console.log(data);
-            });
+        // let response = await fetch(HD_AUTHORIZE_API, {
+        //     method: 'POST',
+        //     body: JSON.stringify(pwd)
+        //   });
+        // response
+        //     .then(response => response.json())
+        //     .then(data => {
+        //         console.log(data);
+        //     });
     }
 });

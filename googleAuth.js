@@ -9,14 +9,52 @@ const authenticate = () => {
         .then(() => { console.log("Sign-in successful"); },
             (err) => { console.error("Error signing in", err); });
 }
-const loadClient = () => {
+const loadClient = async () => {
     gapi.client.setApiKey(CREDENTIALS.apiKey);
     return gapi.client.load("https://photoslibrary.googleapis.com/$discovery/rest?version=v1")
-        .then(() => { console.log("GAPI client loaded for API"); },
-            (err) => { console.error("Error loading GAPI client for API", err); });
+        .then(loadIconPhotos, (err) => { 
+            console.error("Error loading GAPI client for API", err); 
+        });
 }
 
-// Make sure the client is loaded and sign-in is complete before calling this method
+const loadIconPhotos = async () => { 
+    console.log("GAPI client loaded for API"); 
+    return gapi.client.photoslibrary.albums.list({})
+        .then((response) => {
+            console.log(response);
+            const albums = response.result.albums;
+            for (let album_i=0; album_i < albums.length; album_i++) {
+                var album = albums[album_i];
+                if (album['title'] == 'iconPhotos') { // load icon album
+                    return gapi.client.photoslibrary.mediaItems.search({
+                        'albumId': album.id,
+                        'pageSize': 13
+                    }).then((response) => {
+                        console.log(response);
+                         // do stuff here
+                        const mediaItems = response.result.mediaItems;
+                        for (let icon_i = 0; icon_i < mediaItems.length; icon_i++) {
+                            const mediaItem = mediaItems[icon_i];
+                            ICON_DATA.push({
+                                'name': mediaItem.description,
+                                'url': mediaItem.baseUrl
+                            });
+                        }
+                        drawNetwork(CLIENT_NAME, 'picturedWith', picturedWithSVG, 'picturedWithGraph', 'picturedWith');
+                        drawNetwork(CLIENT_NAME, 'takerSubject', takerSubjectSVG, 'takerSubjectGraph', 'takerSubject');
+                        // TODO
+                        while ('nextPageToken' in response) {
+                            console.log('todo');
+                        }
+                    }, (err) => {
+                        console.error("Error loading album client for API", err); 
+                    })
+                }
+            }
+        }, (err) => {
+            console.error("Execute error", err);
+        });
+}
 gapi.load("client:auth2", () => {
     gapi.auth2.init({client_id: CREDENTIALS.clientID});
 });

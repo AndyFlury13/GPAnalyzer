@@ -14,9 +14,9 @@ html *
 .scroller section {
     scroll-snap-align: start;
     border: 5px solid black;
-    height: 90vh;
-    margin-top:10vh;
-    margin-bottom: 10vh;
+    height: 95vh;
+    margin-top:2.5vh;
+    margin-bottom: 2.5vh;
 }
 
 #authenticateButton {
@@ -24,15 +24,15 @@ html *
     cursor: grab;
 }
 
-.monthGraph {
-    display: grid;
-    grid-template-columns: 50vw 50vw
-}
-
 #barChartAndButtons {
     grid-column-start: 1;
     grid-column-end: 2;
-    
+    margin:auto;
+}
+
+.monthSection {
+    display: grid;
+    grid-template-columns: 50vw 50vw
 }
 
 .monthGraphButtons {
@@ -51,13 +51,15 @@ html *
     grid-column-end: 3;
 }
 
-#photoSpread {
+#monthPhotos {
     grid-column-start: 2;
     grid-column-end: 3;
 }
 
-#monthGraphPicture {
-    opacity: 0;
+
+#picturedWithPhotos {
+    grid-column-start: 1;
+    grid-column-end: 2;
 }
 
 .monthGraphButtons > div {
@@ -239,4 +241,53 @@ input.question:invalid ~ input[type="submit"], textarea.question:invalid ~ input
 
 .hdPwdInput {
     margin: 50px;
+}
+
+
+.picturedWithSection {
+    display: grid;
+    grid-template-columns: 40vw 60vw
+}
+
+#picturedWithGraph {
+    grid-column-start: 2;
+    grid-column-end: 3;
+}
+
+#picturedWithPhotos {
+    grid-column-start: 1;
+    grid-column-end: 2;
+}
+
+#pwSVG {
+    display: block;
+    margin: auto;
+}
+
+.displayedPhoto {
+    object-fit: contain;
+    opacity: 0;
+    max-height: 100%;
+    max-width: 100%;
+}
+
+.photoContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.takerSubjectSection {
+    display: grid;
+    grid-template-columns: 60vw 40vw
+}
+
+#takerSubjectGraph {
+    grid-column-start: 1;
+    grid-column-end: 2;
+}
+
+#takerSubjectPhotos {
+    grid-column-start: 2;
+    grid-column-end: 3;
 }

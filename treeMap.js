@@ -9,7 +9,7 @@ var treeMapSVG = d3.select("#categoryGraph")
     .attr("height", treeMapHeight + treeMapMargin.top + treeMapMargin.bottom)
     .append("g")
     .attr("transform",
-            "translate(" + treeMapMargin.left + "," + treeMapMargin.top + ")"); 
+            "translate(" + 10 + "," + treeMapMargin.top + ")"); 
 
 var treeMapTooltip = d3.select("body")
     .append("div")

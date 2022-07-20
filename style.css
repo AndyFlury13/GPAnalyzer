@@ -298,12 +298,13 @@ input.question:invalid ~ input[type="submit"], textarea.question:invalid ~ input
 
 .categorySection {
     display: grid;
-    grid-template-columns: 45vw 55vw
+    grid-template-columns: 50vw 50vw
 }
 
 #categoryGraph {
     grid-column-start: 2;
     grid-column-end: 3;
+    margin: auto;
 }
 
 #categoryPhotos {

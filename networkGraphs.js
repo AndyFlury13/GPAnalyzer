@@ -25,9 +25,9 @@ var takerSubjectSVG = d3.select("#takerSubjectGraph")
             "translate(" + networkMargin.left + "," + networkMargin.top + ")");
 
 var ICON_DATA = [];
+var defsLoaded = false;
 
-
-
+var thumbImg = document.createElement('img');
 
 const drawNetwork = (clientName, dataFileName, svg, pictureIDName, pictureDivName, xOffset, yOffset) => {
     d3.csv("/scripts/data/"+dataFileName+".csv", (data) => {
@@ -90,35 +90,31 @@ const drawNetwork = (clientName, dataFileName, svg, pictureIDName, pictureDivNam
                 TRANSITION_OFF = true;
                 // fadeElement(d3.select('#'+d.target.name+'Circle'), true);
             });
-        
-            var config = {
+            const config = {
                 "avatar_size": 130//define the size of the circle radius
             };
-              
-            var body = d3.select("body");
-              
-            var definitionSVG = body.append("svg")
-                .attr("width", 500)
-                .attr("height", 500);
-              
-            var defs = definitionSVG.append('svg:defs');
+            
 
+            if (!defsLoaded) {
+                const body = d3.select("body");
+                const definitionSVG = body.append("svg");
+                const defs = definitionSVG.append('svg:defs');
+                ICON_DATA.forEach(function(d) {
 
-            ICON_DATA.forEach(function(d) {
-                defs.append("svg:pattern")
-                    .attr("id", d.name+"_icon")
-                    .attr("height", config.avatar_size)
-                    .attr("width",  config.avatar_size)
-                    .append("svg:image")
-                    .attr("href", d.url)
-                    .attr("width", config.avatar_size)
-                    .attr("height", config.avatar_size)
-                    .attr("preserveAspectRatio", "xMidYMid meet")
-                    .attr("x", 0)
-                    .attr("y", 0);
-                
-                }
-            )
+                    defs.append("svg:pattern")
+                        .attr("id", d.name+"_icon")
+                        .attr("patternContentUnits", "objectBoundingBox")
+                        .attr("height", "1")
+                        .attr("width",  "1")
+                        .append("svg:image")
+                        .attr("href", d.url)
+                        .attr("height", "1")
+                        .attr("width", "1");
+                    
+                    }
+                )
+                defsLoaded = true;
+            }
 
         // Initialize the nodes
         
@@ -131,9 +127,8 @@ const drawNetwork = (clientName, dataFileName, svg, pictureIDName, pictureDivNam
                 return d.name+'Circle'
             })
             .attr("r", .9* config.avatar_size / 2)
-            .attr("cx", .6*config.avatar_size / 2)
-            .attr("cy", .6*config.avatar_size / 2)
-            .style("fill", "#000")
+            // .attr("cx", .6*config.avatar_size / 2)
+            // .attr("cy", .6*config.avatar_size / 2)
             .style("fill", (d) => {
                 return "url(#"+d.name+"_icon)";
             })

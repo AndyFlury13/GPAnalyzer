@@ -1,7 +1,7 @@
 // set the dimensions and margins of the graph
-var picturedWithMargin = {top:0, right: 0, bottom: 0, left: 0},
-  picturedWithWidth = 500,
-  picturedWithHeight = 500;
+var networkMargin = {top:0, right: 0, bottom: 0, left: 0},
+  networkWidth = 500,
+  networkHeight = 500;
 
 
 const NAMES = ['me', 'girlBoss', 'shirleyWhirley', 'dumbestKid', 'yuppie', 'bugBoy', 'emily', 'other', 'jiusus', 'chimu']
@@ -13,7 +13,7 @@ var picturedWithSVG = d3.select("#picturedWithGraph")
     .attr("id", "pwSVG")
     .append("g")
     .attr("transform",
-            "translate(" + picturedWithMargin.left + "," + picturedWithMargin.top + ")");
+            "translate(" + networkMargin.left + "," + networkMargin.top + ")");
 
 
 var takerSubjectSVG = d3.select("#takerSubjectGraph")
@@ -22,21 +22,20 @@ var takerSubjectSVG = d3.select("#takerSubjectGraph")
     .attr("height", "100%")
     .append("g")
     .attr("transform",
-            "translate(" + picturedWithMargin.left + "," + picturedWithMargin.top + ")");
+            "translate(" + networkMargin.left + "," + networkMargin.top + ")");
 
 var ICON_DATA = [];
 
 
 
 
-const drawNetwork = (clientName, dataFileName, svg, pictureIDName, pictureDivName) => {
+const drawNetwork = (clientName, dataFileName, svg, pictureIDName, pictureDivName, xOffset, yOffset) => {
     d3.csv("/scripts/data/"+dataFileName+".csv", (data) => {
-        var clientID;
-        const picturedWithData = {"nodes": [], "links":[]};
+        const networkData = {"nodes": [], "links":[]};
     
         var pw_row;
         var mostPicIDs = 0;
-        picturedWithData['nodes'].push({
+        networkData['nodes'].push({
             'id': 0,
             'name': clientName
         });
@@ -54,12 +53,12 @@ const drawNetwork = (clientName, dataFileName, svg, pictureIDName, pictureDivNam
                     if (picIdLength > mostPicIDs) {
                         mostPicIDs = picIdLength;
                     }
-                    picturedWithData['links'].push({
+                    networkData['links'].push({
                         "source": 0,
                         "target": name_i,
                         "picIDs": pw_row[targetName]
                     })
-                    picturedWithData['nodes'].push({
+                    networkData['nodes'].push({
                         id: name_i,
                         'name': targetName,
                         'picIDs': pw_row[targetName]
@@ -71,9 +70,9 @@ const drawNetwork = (clientName, dataFileName, svg, pictureIDName, pictureDivNam
 
         const maxLinkWidth = 20;
         // Initialize the links
-        var picturedWithLink = svg
+        var networkDataLink = svg
             .selectAll("line")
-            .data(picturedWithData.links)
+            .data(networkData.links)
             .enter()
             .append("line")
             .style("stroke", "#aaa")
@@ -84,7 +83,7 @@ const drawNetwork = (clientName, dataFileName, svg, pictureIDName, pictureDivNam
             .on("mouseover", (d, i, n) => {
                 const imgIDs = d['picIDs']?.split("\n,")?.slice(0, -1) ?? [];
                 console.log(imgIDs);
-                loadAndDisplayPictures(imgIDs, pictureIDName, pictureDivName)
+                loadAndDisplayPictures(imgIDs, pictureIDName, pictureDivName);
                 // fadeElement(d3.select('#'+d.target.name+'Circle'), false);
             })
             .on("mouseout", (d) => {
@@ -123,9 +122,9 @@ const drawNetwork = (clientName, dataFileName, svg, pictureIDName, pictureDivNam
 
         // Initialize the nodes
         
-        var picturedWithNode = svg
+        var networkDataNode = svg
             .selectAll("circle")
-            .data(picturedWithData.nodes)
+            .data(networkData.nodes)
             .enter()
             .append("circle")
             .attr('id', (d) => {
@@ -150,14 +149,14 @@ const drawNetwork = (clientName, dataFileName, svg, pictureIDName, pictureDivNam
             });
         
         // This function is run at each iteration of the force algorithm, updating the nodes position.
-        const picturedWithTicked = () => {
-            picturedWithLink
+        const networkTicked = () => {
+            networkDataLink
                 .attr("x1", (d) => { return d.source.x; })
                 .attr("y1", (d) => { return d.source.y; })
                 .attr("x2", (d) => { return d.target.x; })
                 .attr("y2", (d) => { return d.target.y; });
         
-            picturedWithNode
+            networkDataNode
                 .attr("cx", (d) =>  { return d.x+1; })
                 .attr("cy", (d) => { return d.y-1; })
                 
@@ -166,14 +165,14 @@ const drawNetwork = (clientName, dataFileName, svg, pictureIDName, pictureDivNam
         };
 
         // Let's list the force we wanna apply on the network
-        var picturedWithSimulation = d3.forceSimulation(picturedWithData.nodes)                 // Force algorithm is applied to data.nodes
+        var networkDataSimulation = d3.forceSimulation(networkData.nodes)                 // Force algorithm is applied to data.nodes
             .force("link", d3.forceLink()                               // This force provides links between nodes
                     .id((d) => { return d.id; })                     // This provide  the id of a node
-                    .links(picturedWithData.links)                                    // and this the list of links
+                    .links(networkData.links)                                    // and this the list of links
             )
             .force("charge", d3.forceManyBody().strength(-5000))         // This adds repulsion between nodes. Play with the -400 for the repulsion strength
-            .force("center", d3.forceCenter(picturedWithWidth/2+100, picturedWithHeight/2+50))     // This force attracts nodes to the center of the svg area
-            .on("end", picturedWithTicked);
+            .force("center", d3.forceCenter(networkWidth/2+xOffset, networkHeight/2+yOffset))     // This force attracts nodes to the center of the svg area
+            .on("end", networkTicked);
         
         
     

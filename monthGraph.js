@@ -1,6 +1,6 @@
 const MONTHS = ['August','September', 'October', 'November', 'December', 'January', 'February', 'March', 'April', 'May', 'June'];
 const shortenedMonths = ['Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun']
-const CLIENT_NAME = 'bugBoy';
+const CLIENT_NAME = 'me';
 var USER;
 var CURRENT_SUBJECT_OR_TAKER = 'photoTaker';
 var TRANSITION_OFF = true;
@@ -120,7 +120,7 @@ const loadAndDisplayPictures = (imgIDs, pictureIDName, pictureDivName) => {
         IMG_CONTAINER_REF[0]?.remove();
         animatePicture(urlToDisplay, pictureIDName, pictureDivName);
         const imgCycler = setInterval(()=> {
-            if (timer > 300) {
+            if (timer > 350) {
                 timer = 0;
                 console.log('image change!');
                 imgIDs_i++;

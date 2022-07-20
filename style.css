@@ -4,6 +4,9 @@ html *
    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif !important;
 }
 
+body {
+    height: 100vh;
+}
 
 .scroller {
     height: 100vh;
@@ -275,6 +278,7 @@ input.question:invalid ~ input[type="submit"], textarea.question:invalid ~ input
     display: flex;
     justify-content: center;
     align-items: center;
+    height: 95vh;
 }
 
 .takerSubjectSection {
@@ -290,4 +294,31 @@ input.question:invalid ~ input[type="submit"], textarea.question:invalid ~ input
 #takerSubjectPhotos {
     grid-column-start: 2;
     grid-column-end: 3;
+}
+
+.categorySection {
+    display: grid;
+    grid-template-columns: 45vw 55vw
+}
+
+#categoryGraph {
+    grid-column-start: 2;
+    grid-column-end: 3;
+}
+
+#categoryPhotos {
+    grid-column-start: 1;
+    grid-column-end: 2;
+}
+
+.tooltip {
+    position: absolute;
+    display: block;
+    color: white;
+    background-color: grey;
+    border-radius: 10px;
+    width: fit-content;
+    padding: 10px;
+    z-index: 13;
+    pointer-events: none;
 }

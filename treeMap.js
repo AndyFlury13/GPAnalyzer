@@ -9,7 +9,14 @@ var treeMapSVG = d3.select("#categoryGraph")
     .attr("height", treeMapHeight + treeMapMargin.top + treeMapMargin.bottom)
     .append("g")
     .attr("transform",
-            "translate(" + treeMapMargin.left + "," + treeMapMargin.top + ")");
+            "translate(" + treeMapMargin.left + "," + treeMapMargin.top + ")"); 
+
+var treeMapTooltip = d3.select("body")
+    .append("div")
+    .attr("class", "tooltip")
+    .style("opacity", 0)
+    .style("text-align", "center")
+    .style("margin", "auto");
 
 // read json data
 const drawTreeMap = (clientName) => {
@@ -23,11 +30,9 @@ const drawTreeMap = (clientName) => {
             row = data[row_i];
             if (row['client'] == clientName) {
                 for (category in row) {
-                    console.log(category)
                     if (category == 'client') {
                         continue;
                     }
-                    console.log(row[category]);
                     numIDs = row[category]?.split(",")?.slice(0, -1)?.length ?? 0
                     if (numIDs == 0) {
                         continue
@@ -63,27 +68,54 @@ const drawTreeMap = (clientName) => {
             .attr('height', function (d) { return (d.y1 - d.y0) + 200; })
             .style("stroke", "white")
             .style("fill", "slateblue")
-            .on('mouseover', (d) => {
-                const imgIDs = d['picIDs']?.split(",")?.slice(0, -1) ?? [];
-                console.log(imgIDs);
-                loadAndDisplayPictures(imgIDs, 'categoryGraphPhoto', 'categoryPhotos')
+            .on('mouseenter', (d) => {
+                const imgIDs = d['data']['picIDs']?.split(",")?.slice(0, -1) ?? [];
+                
+                // loadAndDisplayPictures(imgIDs, 'categoryGraph', 'category');
+                drawTooltip(treeMapTooltip, d['data']['name'], d3.event.x, d3.event.y);
             })
-            .on('mouseout', (d) => {
+            .on('mousemove', (d) => {
+                drawTooltip(treeMapTooltip, d['data']['name'], d3.event.x, d3.event.y);
+            })
+            .on('mouseleave', (d) => {
                 TRANSITION_OFF = true;
-            })
+            });
 
-        // and to add the text labels
-        treeMapSVG
-            .selectAll("text")
-            .data(root.leaves())
-            .enter()
-            .append("text")
-            .attr("x", function(d){ return d.x0+5})    // +10 to adjust position (more right)
-            .attr("y", function(d){ return d.y0+20})    // +20 to adjust position (lower)
-            .text(function(d){ return d.data.name })
-            .attr("font-size", "15px")
-            .attr("fill", "white")
+        var bBox = treeMapSVG.node().getBBox();
+        $("#categoryGraph").css(
+            "height", bBox.height.toString()
+        );
+        $("#categoryGraph").css("width", bBox.width.toString());
     });
-}
-
+};
+$('#categoryGraph')
+    .on('mouseleave', (d) => {
+        console.log(d);
+        console.log('mouse leave');
+        clearTooltip(treeMapTooltip)
+        
+    });
 drawTreeMap(CLIENT_NAME);
+
+const drawTooltip = (div, text, x, y) => {
+    div
+        .transition()
+        .duration(100)
+        .style("opacity", 1);
+    div.html(text)
+        .style("left", (x)+"px")
+        .style("top", (y) + "px");
+};
+
+const updateTooltip  = (div, text, x, y) => {
+    div.html(text)
+        .style("left", (x)+"px")
+        .style("top", (y) + "px");
+};
+
+const clearTooltip = (div) => {
+    div
+        .transition()
+        .duration(100)
+        .style("opacity", 0);
+}

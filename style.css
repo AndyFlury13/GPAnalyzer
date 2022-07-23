@@ -1,6 +1,6 @@
 html *
 {
-   font-size: 1em !important;
+   font-size: 1em;
    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif !important;
 }
 
@@ -27,97 +27,6 @@ body {
     cursor: grab;
 }
 
-#barChartAndButtons {
-    grid-column-start: 1;
-    grid-column-end: 2;
-    margin:auto;
-}
-
-.monthSection {
-    display: grid;
-    grid-template-columns: 50vw 50vw
-}
-
-.monthGraphButtons {
-    display: grid;
-    grid-template-rows: 50% 50%;
-    place-items:  center;
-}
-
-#monthGraphPhotoTakerButton {
-    grid-column-start: 1;
-    grid-column-end: 2;
-}
-
-#monthGraphPhotoSubjectButton {
-    grid-column-start: 2;
-    grid-column-end: 3;
-}
-
-#monthPhotos {
-    grid-column-start: 2;
-    grid-column-end: 3;
-}
-
-
-#picturedWithPhotos {
-    grid-column-start: 1;
-    grid-column-end: 2;
-}
-
-.monthGraphButtons > div {
-    text-decoration:none;
-    display: inline-block;
-    opacity: 1;
-    transition: opacity .5s;
-}
-
-/* add a empty string after the elements with class .slide-center-out  */
-.slide-in-out-photoTaker {
-    display: block;
-    height: 3px;
-    width: 0%;
-    background: transparent;
-    transition: width .5s ease, background-color .5s ease;
-    -webkit-transition: width .5s ease, background-color .5s ease;
-    -moz-transition: width .5s ease, background-color .5s ease;
-    
-    margin:auto; /* center the content so it will slide from the midddle to the left and right */
-}
-
-.slide-in-out-subject {
-    display: block;
-    height: 3px;
-    width: 0%;
-    background: transparent;
-    transition: width .5s ease, background-color .5s ease;
-    -webkit-transition: width .5s ease, background-color .5s ease;
-    -moz-transition: width .5s ease, background-color .5s ease;
-    
-    margin:auto; /* center the content so it will slide from the midddle to the left and right */
-}
- 
-.monthGraphButtons > div:hover {
-    cursor: pointer;
-    opacity: .5;
-}
-
-/* Change the width and background on hover, aka sliding from the middle to the left and right */
-.slide-in-out-photoTaker.slide {
-    width: 100%;
-    background: black;
-}
-
-/* Change the width and background on hover, aka sliding from the middle to the left and right */
-.slide-in-out-subject.slide {
-    width: 100%;
-    background: black;
-}
-
-/*
-Basic input element using psuedo classes
-*/
-  
 input, label,textarea {
     font-family: 'Ubuntu', sans-serif;
     display: block;
@@ -157,6 +66,10 @@ input.question + label, textarea.question + label {
     transition: width 0.4s ease;
     height: 0px;
 }
+
+input.question + label > span, textarea.question + label > span {
+    font-size: 40px;
+}
   
 input.question:focus + label, textarea.question:focus + label {
     width: 80%;
@@ -195,7 +108,7 @@ input.question + label > span, textarea.question + label > span {
     margin: 0;
     position: absolute;
     color: #8F8F8F;
-    font-size: 48px;
+    font-size: 40px;
     top: -66px;
     left: 0px;
     z-index: -1;
@@ -246,10 +159,101 @@ input.question:invalid ~ input[type="submit"], textarea.question:invalid ~ input
     margin: 50px;
 }
 
+#barChartAndButtons {
+    float: left;
+    width: 50%;
+    display: grid;
+    margin:auto;
+}
+
+.monthGraphButtons {
+    display: grid;
+    grid-template-columns: 50% 50%;
+    justify-items: center;
+    margin-top: 26px;
+}
+
+.monthGraphButtons > div {
+    text-decoration:none;
+    display: inline-block;
+    opacity: 1;
+    transition: opacity .5s;
+    font-size: 3vh;
+}
+
+#monthGraphPhotoTakerButton {
+    grid-column-start: 1;
+    grid-column-end: 2;
+}
+
+#monthGraphPhotoSubjectButton {
+    grid-column-start: 2;
+    grid-column-end: 3;
+}
+
+.monthGraphYAxis {
+    font: 13vh trebuchet;
+}
+
+.monthGraphXAxis {
+    font: 13vh trebuchet;
+}
+
+#monthPhotos {
+    width: 50%;
+    float: right;
+}
+
+.slide-in-out-photoTaker {
+    display: block;
+    height: 3px;
+    width: 0%;
+    background: transparent;
+    transition: width .5s ease, background-color .5s ease;
+    -webkit-transition: width .5s ease, background-color .5s ease;
+    -moz-transition: width .5s ease, background-color .5s ease;
+    
+    margin:auto; /* center the content so it will slide from the midddle to the left and right */
+}
+
+.slide-in-out-subject {
+    display: block;
+    height: 3px;
+    width: 0%;
+    background: transparent;
+    transition: width .5s ease, background-color .5s ease;
+    -webkit-transition: width .5s ease, background-color .5s ease;
+    -moz-transition: width .5s ease, background-color .5s ease;
+    
+    margin:auto; /* center the content so it will slide from the midddle to the left and right */
+}
+ 
+.monthGraphButtons > div:hover {
+    cursor: pointer;
+    opacity: .5;
+}
+
+/* Change the width and background on hover, aka sliding from the middle to the left and right */
+.slide-in-out-photoTaker.slide {
+    width: 100%;
+    background: black;
+}
+
+/* Change the width and background on hover, aka sliding from the middle to the left and right */
+.slide-in-out-subject.slide {
+    width: 100%;
+    background: black;
+}
+
 
 .picturedWithSection {
     display: grid;
     grid-template-columns: 40vw 60vw
+}
+
+#picturedWithPhotos {
+    grid-column-start: 1;
+    grid-column-end: 2;
 }
 
 #picturedWithGraph {
@@ -267,20 +271,6 @@ input.question:invalid ~ input[type="submit"], textarea.question:invalid ~ input
     margin: auto;
 }
 
-.displayedPhoto {
-    object-fit: contain;
-    opacity: 0;
-    max-height: 100%;
-    max-width: 100%;
-}
-
-.photoContainer {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 95vh;
-}
-
 .takerSubjectSection {
     display: grid;
     grid-template-columns: 60vw 40vw
@@ -296,20 +286,21 @@ input.question:invalid ~ input[type="submit"], textarea.question:invalid ~ input
     grid-column-end: 3;
 }
 
-.categorySection {
-    display: grid;
-    grid-template-columns: 50vw 50vw
-}
+/* .categorySection {
+   display: grid;
+   grid-template-columns: 50vw 50vw;
+} */
 
 #categoryGraph {
-    grid-column-start: 2;
-    grid-column-end: 3;
-    margin: auto;
+    height: 95vh;
+    width: 50%;
+    float: left;
 }
 
 #categoryPhotos {
-    grid-column-start: 1;
-    grid-column-end: 2;
+    /* display: inline-block; */
+    float:left;
+    width: 50%;
 }
 
 .tooltip {
@@ -323,3 +314,30 @@ input.question:invalid ~ input[type="submit"], textarea.question:invalid ~ input
     z-index: 13;
     pointer-events: none;
 }
+
+.displayedPhoto {
+    object-fit: contain;
+    opacity: 0;
+    max-height: 100%;
+    max-width: 100%;
+}
+
+.photoContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 95vh;
+}
+
+.svg-container {
+    display: inline-block;
+    position: relative;
+    width: 100%;
+    /* justify-content: center; */
+    margin: 0;
+}
+.svg-content-responsive {
+    display: inline-block;
+    position: absolute;
+}
+

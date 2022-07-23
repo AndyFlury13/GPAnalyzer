@@ -7,35 +7,51 @@ var TRANSITION_OFF = true;
 const IMG_CONTAINER_REF = [];
 $(".slide-in-out-photoTaker").toggleClass("slide");
 
-var monthGraphMargin = {top: 30, right: 30, bottom: 70, left: 60},
-    width = 600 - monthGraphMargin.left - monthGraphMargin.right,
-    height = 400 - monthGraphMargin.top - monthGraphMargin.bottom;
+// var monthGraphMargin = {top: 30, right: 30, bottom: 70, left: 60},
+//     width = 600 - monthGraphMargin.left - monthGraphMargin.right,
+//     height = 400 - monthGraphMargin.top - monthGraphMargin.bottom;
+
+
+const monthGraphWidth = 2000
+const monthGraphHeight = 1400
 
 // append the svg object to the body of the page
 var monthGraphSVG = d3.select("#monthGraph")
+    // .attr("width", width + monthGraphMargin.left + monthGraphMargin.right)
+    // .attr("height", height + monthGraphMargin.top + monthGraphMargin.bottom)
+    .append("div")
+    .classed("svg-container", true) //container class to make it responsive
     .append("svg")
-    .attr("width", width + monthGraphMargin.left + monthGraphMargin.right)
-    .attr("height", height + monthGraphMargin.top + monthGraphMargin.bottom)
+   //responsive SVG needs these 2 attributes and no width and height attr
+    .attr("preserveAspectRatio", "xMinYMin meet")
+    .attr("viewBox", "0 0 " + (monthGraphWidth+100).toString() + " "+  (monthGraphHeight+250).toString() +"")
+   //class to make it responsive
+    .classed("svg-content-responsive", true)
+    // .append("svg")
+    
+    // .attr("preserveAspectRatio", "xMinYMin meet")
+    // .attr("viewBox", "0 0 600 600")
+    // .classed("svg-content", true)
     .append("g")
     .attr("transform",
-        "translate(" + monthGraphMargin.left + "," + monthGraphMargin.top + ")");
+            "translate(" + 100 + "," +100 + ")"); 
 
 var monthGraphX = d3.scaleBand()
-    .range([ 0, width ])
+    .range([ 0, monthGraphWidth ])
     .padding(0.2);
 
 var monthGraphXAxis = monthGraphSVG.append("g")
-    .attr("transform", "translate(0," + height + ")");
+    .attr("class", "monthGraphXAxis")
+    .attr("transform", "translate(0," + monthGraphHeight + ")");
 
 var SUBJECT_OR_TAKER;
     
 var monthGraphY = d3.scaleLinear()
-    .range([ height, 0]);
+    .range([ monthGraphHeight, 0]);
+
 
 var monthGraphYAxis = monthGraphSVG.append("g")
-    .attr("class", "monthGraphYaxis");
-
-const aspect = width/height, chart = d3.select('#my_dataviz');
+    .attr("class", "monthGraphYAxis");
 
 const drawBarGraph = (clientName, subjectOrTaker) => {
     if (subjectOrTaker != CURRENT_SUBJECT_OR_TAKER) {
@@ -67,7 +83,6 @@ const drawBarGraph = (clientName, subjectOrTaker) => {
             monthGraphXAxis.transition().duration(1000).call(d3.axisBottom(monthGraphX))
                 .selectAll("text")  
                 .style("text-anchor", "end")
-                .style("font", "26px trebuchet")
                 .attr("transform", "rotate(-65)");
 
             // Add Y axis
@@ -100,7 +115,7 @@ const drawBarGraph = (clientName, subjectOrTaker) => {
                     .attr("x", (d) => { return monthGraphX(d.month); })
                     .attr("y", (d) => { return monthGraphY(d[subjectOrTaker].split(",").length-1); })
                     .attr("width", monthGraphX.bandwidth())
-                    .attr("height", (d) => { return height - monthGraphY(d[subjectOrTaker].split(",").length-1); })
+                    .attr("height", (d) => { return monthGraphHeight - monthGraphY(d[subjectOrTaker].split(",").length-1); })
                     .attr("fill", bar_color);
         });
     });

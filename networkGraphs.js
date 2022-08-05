@@ -1,35 +1,32 @@
 // set the dimensions and margins of the graph
 var networkMargin = {top:0, right: 0, bottom: 0, left: 0},
-  networkWidth = 500,
-  networkHeight = 500;
+  networkWidth = 550,
+  networkHeight = 550;
 
 
 const NAMES = ['me', 'girlBoss', 'shirleyWhirley', 'dumbestKid', 'yuppie', 'bugBoy', 'emily', 'other', 'jiusus', 'chimu']
 // append the svg object to the body of the page
 var picturedWithSVG = d3.select("#picturedWithGraph")
     .append("svg")
-    .attr("width", "100%")
-    .attr("height", "100%")
-    .attr("id", "pwSVG")
+    .classed("centeredSVG", true)
+    .attr("height", networkHeight+networkMargin.bottom+networkMargin.top)
+    .attr("width", networkWidth+networkMargin.left+networkMargin.right)
     .append("g")
-    .attr("transform",
-            "translate(" + networkMargin.left + "," + networkMargin.top + ")");
+    .attr("transform", "translate("+networkMargin.left+","+networkMargin.top+")");
 
 
 var takerSubjectSVG = d3.select("#takerSubjectGraph")
     .append("svg")
-    .attr("width", "100%")
-    .attr("height", "100%")
+    .classed("centeredSVG", true)
+    .attr("height", networkHeight+networkMargin.bottom+networkMargin.top)
+    .attr("width", networkWidth+networkMargin.left+networkMargin.right)
     .append("g")
-    .attr("transform",
-            "translate(" + networkMargin.left + "," + networkMargin.top + ")");
+    .attr("transform", "translate("+networkMargin.left+","+networkMargin.top+")");
 
 var ICON_DATA = [];
 var defsLoaded = false;
 
-var thumbImg = document.createElement('img');
-
-const drawNetwork = (clientName, dataFileName, svg, pictureIDName, pictureDivName, xOffset, yOffset) => {
+const drawNetwork = (clientName, dataFileName, svg, pictureIDName, pictureDivName) => {
     d3.csv("/scripts/data/"+dataFileName+".csv", (data) => {
         const networkData = {"nodes": [], "links":[]};
     
@@ -166,7 +163,7 @@ const drawNetwork = (clientName, dataFileName, svg, pictureIDName, pictureDivNam
                     .links(networkData.links)                                    // and this the list of links
             )
             .force("charge", d3.forceManyBody().strength(-5000))         // This adds repulsion between nodes. Play with the -400 for the repulsion strength
-            .force("center", d3.forceCenter(networkWidth/2+xOffset, networkHeight/2+yOffset))     // This force attracts nodes to the center of the svg area
+            .force("center", d3.forceCenter(networkWidth/2, networkHeight/2))     // This force attracts nodes to the center of the svg area
             .on("end", networkTicked);
         
         

@@ -20,6 +20,7 @@ body {
     height: 95vh;
     margin-top:2.5vh;
     margin-bottom: 2.5vh;
+    overflow: hidden;
 }
 
 #authenticateButton {
@@ -159,9 +160,9 @@ input.question:invalid ~ input[type="submit"], textarea.question:invalid ~ input
     margin: 50px;
 }
 
-#barChartAndButtons {
+#monthGraphAndButtons {
     float: left;
-    width: 50%;
+    width: 50vw;
     display: grid;
     margin:auto;
 }
@@ -170,7 +171,8 @@ input.question:invalid ~ input[type="submit"], textarea.question:invalid ~ input
     display: grid;
     grid-template-columns: 50% 50%;
     justify-items: center;
-    margin-top: 26px;
+    align-items: center;
+    height: 20vh;
 }
 
 .monthGraphButtons > div {
@@ -178,7 +180,7 @@ input.question:invalid ~ input[type="submit"], textarea.question:invalid ~ input
     display: inline-block;
     opacity: 1;
     transition: opacity .5s;
-    font-size: 3vh;
+    font-size: 20px;
 }
 
 #monthGraphPhotoTakerButton {
@@ -192,11 +194,15 @@ input.question:invalid ~ input[type="submit"], textarea.question:invalid ~ input
 }
 
 .monthGraphYAxis {
-    font: 13vh trebuchet;
+    font: 20px trebuchet;
 }
 
 .monthGraphXAxis {
-    font: 13vh trebuchet;
+    font: 20px trebuchet;
+}
+
+.monthGraphSVG {
+    
 }
 
 #monthPhotos {
@@ -245,60 +251,23 @@ input.question:invalid ~ input[type="submit"], textarea.question:invalid ~ input
     background: black;
 }
 
-
-.picturedWithSection {
-    display: grid;
-    grid-template-columns: 40vw 60vw
-}
-
-#picturedWithPhotos {
-    grid-column-start: 1;
-    grid-column-end: 2;
-}
-
-#picturedWithGraph {
-    grid-column-start: 2;
-    grid-column-end: 3;
-}
-
-#picturedWithPhotos {
-    grid-column-start: 1;
-    grid-column-end: 2;
-}
-
-#pwSVG {
-    display: block;
-    margin: auto;
-}
-
-.takerSubjectSection {
-    display: grid;
-    grid-template-columns: 60vw 40vw
-}
-
-#takerSubjectGraph {
-    grid-column-start: 1;
-    grid-column-end: 2;
-}
-
-#takerSubjectPhotos {
-    grid-column-start: 2;
-    grid-column-end: 3;
-}
-
-/* .categorySection {
-   display: grid;
-   grid-template-columns: 50vw 50vw;
-} */
-
-#categoryGraph {
-    height: 95vh;
+#treeMap {
+    float: right;
     width: 50%;
-    float: left;
+    margin:auto;
+    height:100%;
 }
 
-#categoryPhotos {
-    /* display: inline-block; */
+.centeredSVG {
+    position: relative;
+    top: 50%;
+    left: 50%;
+    -webkit-transform: translate(-50%, -50%);
+    -ms-transform: translateY(-50%, -50%);
+    transform: translateY(-50%, -50%);
+}
+
+#treeMapPhotos {
     float:left;
     width: 50%;
 }
@@ -313,6 +282,28 @@ input.question:invalid ~ input[type="submit"], textarea.question:invalid ~ input
     padding: 10px;
     z-index: 13;
     pointer-events: none;
+}
+
+#takerSubjectGraph {
+    float: left;
+    width: 50%;
+    height:100%;
+}
+
+#takerSubjectPhotos {
+    float: right;
+    width: 50%;
+}
+
+#picturedWithPhotos {
+    float: left;
+    width: 50%;
+}
+
+#picturedWithGraph {
+    float: right;
+    width: 50%;
+    height:100%;
 }
 
 .displayedPhoto {
@@ -333,8 +324,6 @@ input.question:invalid ~ input[type="submit"], textarea.question:invalid ~ input
     display: inline-block;
     position: relative;
     width: 100%;
-    /* justify-content: center; */
-    margin: 0;
 }
 .svg-content-responsive {
     display: inline-block;

@@ -12,29 +12,18 @@ $(".slide-in-out-photoTaker").toggleClass("slide");
 //     height = 400 - monthGraphMargin.top - monthGraphMargin.bottom;
 
 
-const monthGraphWidth = 2000
-const monthGraphHeight = 1400
+const monthGraphWidth = 550
+const monthGraphHeight = 380
+const monthGraphMargin = {top: 10, right: 10, bottom: 40, left: 40};
 
 // append the svg object to the body of the page
 var monthGraphSVG = d3.select("#monthGraph")
-    // .attr("width", width + monthGraphMargin.left + monthGraphMargin.right)
-    // .attr("height", height + monthGraphMargin.top + monthGraphMargin.bottom)
-    .append("div")
-    .classed("svg-container", true) //container class to make it responsive
     .append("svg")
-   //responsive SVG needs these 2 attributes and no width and height attr
-    .attr("preserveAspectRatio", "xMinYMin meet")
-    .attr("viewBox", "0 0 " + (monthGraphWidth+100).toString() + " "+  (monthGraphHeight+250).toString() +"")
-   //class to make it responsive
-    .classed("svg-content-responsive", true)
-    // .append("svg")
-    
-    // .attr("preserveAspectRatio", "xMinYMin meet")
-    // .attr("viewBox", "0 0 600 600")
-    // .classed("svg-content", true)
+    .classed("centeredSVG", true)
+    .attr("height", monthGraphHeight+monthGraphMargin.top+monthGraphMargin.bottom)
+    .attr("width", monthGraphWidth+monthGraphMargin.left + monthGraphMargin.left)
     .append("g")
-    .attr("transform",
-            "translate(" + 100 + "," +100 + ")"); 
+    .attr("transform", "translate("+monthGraphMargin.left+","+monthGraphMargin.top+")");
 
 var monthGraphX = d3.scaleBand()
     .range([ 0, monthGraphWidth ])

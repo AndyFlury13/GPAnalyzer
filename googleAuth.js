@@ -40,8 +40,8 @@ const loadIconPhotos = async () => {
                                 'url': mediaItem.baseUrl
                             });
                         }
-                        drawNetwork(CLIENT_NAME, 'picturedWith', picturedWithSVG, 'picturedWithGraph', 'picturedWith', 100, 50);
-                        drawNetwork(CLIENT_NAME, 'takerSubject', takerSubjectSVG, 'takerSubjectGraph', 'takerSubject', 0, 0);
+                        drawNetwork(CLIENT_NAME, 'picturedWith', picturedWithSVG, 'picturedWithGraph', 'picturedWith');
+                        drawNetwork(CLIENT_NAME, 'takerSubject', takerSubjectSVG, 'takerSubjectGraph', 'takerSubject');
                         // TODO
                         while ('nextPageToken' in response) {
                             console.log('todo');

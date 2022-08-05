@@ -2,26 +2,19 @@
 //   treeMapWidth = 555 - treeMapMargin.left - treeMapMargin.right,
 //   treeMapHeight = 1045 - treeMapMargin.top - treeMapMargin.bottom;
 
-var treeMapWidth = 800;
-var treeMapHeight= 650
+var treeMapWidth = 650;
+var treeMapHeight= 480;
 // append the svg object to the body of the page
-var treeMapSVG = d3.select("#categoryGraph")
-    .append("div")
-    .classed("svg-container", true) //container class to make it responsive
+
+const treeMapMargin = {top: 0, right: 0, bottom: 0, left: 0};
+
+var treeMapSVG = d3.select("#treeMap")
     .append("svg")
-   //responsive SVG needs these 2 attributes and no width and height attr
-    .attr("preserveAspectRatio", "xMinYMin meet")
-    .attr("viewBox", "0 0 " + treeMapWidth.toString() + " "+ treeMapHeight.toString() +"")
-   //class to make it responsive
-    .classed("svg-content-responsive", true)
-    // .append("svg")
-    
-    // .attr("preserveAspectRatio", "xMinYMin meet")
-    // .attr("viewBox", "0 0 600 600")
-    // .classed("svg-content", true)
+    .classed("centeredSVG", true)
+    .attr("height", treeMapHeight+treeMapMargin.top+treeMapMargin.bottom)
+    .attr("width", treeMapWidth+treeMapMargin.left + treeMapMargin.left)
     .append("g")
-    .attr("transform",
-            "translate(" + 0 + "," +50 + ")"); 
+    .attr("transform", "translate("+treeMapMargin.left+","+treeMapMargin.top+")");
 
 var treeMapTooltip = d3.select("body")
     .append("div")
@@ -64,7 +57,7 @@ const drawTreeMap = (clientName) => {
 
         // Then d3.treemap computes the position of each element of the hierarchy
         d3.treemap()
-            .size([treeMapWidth, treeMapWidth])
+            .size([treeMapWidth, treeMapHeight])
             .padding(2)
             (root)
 
@@ -76,14 +69,14 @@ const drawTreeMap = (clientName) => {
             .append("rect")
             .attr('x', function (d) { return d.x0; })
             .attr('y', function (d) { return d.y0; })
-            .attr('width', function (d) { return d.x1 - d.x0 + 0; })
-            .attr('height', function (d) { return (d.y1 - d.y0) + 0; })
+            .attr('width', function (d) { return d.x1 - d.x0; })
+            .attr('height', function (d) { return d.y1 - d.y0; })
             .style("stroke", "white")
             .style("fill", "slateblue")
             .on('mouseenter', (d) => {
                 const imgIDs = d['data']['picIDs']?.split(",")?.slice(0, -1) ?? [];
                 console.log('mouseenter')
-                loadAndDisplayPictures(imgIDs, 'categoryGraph', 'category');
+                // loadAndDisplayPictures(imgIDs, 'categoryGraph', 'category');
                 drawTooltip(treeMapTooltip, d['data']['name'], d3.event.x, d3.event.y);
             })
             .on('mousemove', (d) => {
@@ -95,8 +88,6 @@ const drawTreeMap = (clientName) => {
                 TRANSITION_OFF = true;
                 clearTooltip(treeMapTooltip);
             });
-
-        var bBox = treeMapSVG.node().getBBox();
     });
 };
 
@@ -105,7 +96,7 @@ drawTreeMap(CLIENT_NAME);
 const drawTooltip = (div, text, x, y) => {
     div
         .transition()
-        .duration(100)
+        .duration(75)
         .style("opacity", 1);
     div.html(text)
         .style("left", (x)+"px")

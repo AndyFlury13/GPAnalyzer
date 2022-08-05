@@ -21,7 +21,6 @@ const loadIconPhotos = async () => {
     console.log("GAPI client loaded for API"); 
     return gapi.client.photoslibrary.albums.list({})
         .then((response) => {
-            console.log(response);
             const albums = response.result.albums;
             for (let album_i=0; album_i < albums.length; album_i++) {
                 var album = albums[album_i];
@@ -30,7 +29,6 @@ const loadIconPhotos = async () => {
                         'albumId': album.id,
                         'pageSize': 13
                     }).then((response) => {
-                        console.log(response);
                          // do stuff here
                         const mediaItems = response.result.mediaItems;
                         for (let icon_i = 0; icon_i < mediaItems.length; icon_i++) {
@@ -40,8 +38,9 @@ const loadIconPhotos = async () => {
                                 'url': mediaItem.baseUrl
                             });
                         }
-                        drawNetwork(CLIENT_NAME, 'picturedWith', picturedWithSVG, 'picturedWithGraph', 'picturedWith');
-                        drawNetwork(CLIENT_NAME, 'takerSubject', takerSubjectSVG, 'takerSubjectGraph', 'takerSubject');
+                        drawNetwork(CLIENT_NAME, 'picturedWith', clientPicturedWithSVG, 'clientPicturedWithGraph', 'clientPicturedWith');
+                        drawNetwork(CLIENT_NAME, 'takerSubject', clientTakerSubjectSVG, 'clientTakerSubjectGraph', 'clientTakerSubject');
+                        drawNetwork('total', 'picturedWIth', totalPicturedWithSVG, 'null', 'null');
                         // TODO
                         while ('nextPageToken' in response) {
                             console.log('todo');

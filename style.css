@@ -284,23 +284,23 @@ input.question:invalid ~ input[type="submit"], textarea.question:invalid ~ input
     pointer-events: none;
 }
 
-#takerSubjectGraph {
+#clientTakerSubjectGraph {
     float: left;
     width: 50%;
     height:100%;
 }
 
-#takerSubjectPhotos {
+#clientTakerSubjectPhotos {
     float: right;
     width: 50%;
 }
 
-#picturedWithPhotos {
+#clientPicturedWithPhotos {
     float: left;
     width: 50%;
 }
 
-#picturedWithGraph {
+#clientPicturedWithGraph {
     float: right;
     width: 50%;
     height:100%;
@@ -330,3 +330,7 @@ input.question:invalid ~ input[type="submit"], textarea.question:invalid ~ input
     position: absolute;
 }
 
+#totalGraph {
+    height:100%;
+    width:100%;
+}

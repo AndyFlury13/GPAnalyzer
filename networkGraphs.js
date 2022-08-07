@@ -40,30 +40,41 @@ const drawNetwork = (clientName, dataFileName, svg, pictureIDName, pictureDivNam
         dataAndMostPicIds =  processData(clientName, data);
         const mostPicIDs = dataAndMostPicIds['mostPicIDs']
         const networkData = dataAndMostPicIds['data'];
-        console.log(networkData);
-        const maxLinkWidth = 20;
+        const maxLinkWidth = 10;
         // Initialize the links
         var networkDataLink = svg
             .selectAll("line")
             .data(networkData.links)
             .enter()
             .append("line")
+            .attr("class", (d) => {
+                return d.sourceName + "Link " + d.targetName+"Link";
+            })
             .style("stroke", "#aaa")
             .style("stroke-width", (d) => {
-                const numPicIDs = d['picIDs']?.split("\n,")?.slice(0, -1)?.length ?? 1
+                const numPicIDs = d['picIDs']?.split("\n,")?.slice(0, -1)?.length + 1 ?? 1
                 const width = Math.ceil(maxLinkWidth * numPicIDs / mostPicIDs);
-                console.log(width);
-                return 10
+                return width;
             })
             .on("mouseover", (d, i, n) => {
                 const imgIDs = d['picIDs']?.split("\n,")?.slice(0, -1) ?? [];
-                console.log(imgIDs);
                 // loadAndDisplayPictures(imgIDs, pictureIDName, pictureDivName);
-                // fadeElement(d3.select('#'+d.target.name+'Circle'), false);
+                console.log(d);
+                maskElement(d3.select('.'+d.targetName+'Link'), true);
+                maskElement(d3.select('#'+d.targetName+'Circle'), true);
+                if (clientName == 'total') {
+                    maskElement(d3.select('#'+d.sourceName+'Circle'), true);
+                }
+                
+                
             })
             .on("mouseout", (d) => {
                 TRANSITION_OFF = true;
-                // fadeElement(d3.select('#'+d.target.name+'Circle'), true);
+                maskElement(d3.select('.'+d.targetName+'Link'), false);
+                maskElement(d3.select('#'+d.targetName+'Circle'), false);
+                if (clientName == 'total') {
+                    maskElement(d3.select('#'+d.sourceName+'Circle'), false);
+                }
             });
             const config = {
                 "avatar_size": 130//define the size of the circle radius
@@ -107,13 +118,16 @@ const drawNetwork = (clientName, dataFileName, svg, pictureIDName, pictureDivNam
             })
             .on('mouseover',(d, i, n) => {
                 const imgIDs = d['picIDs']?.split("\n,")?.slice(0, -1) ?? [];
-                console.log(imgIDs);
                 // loadAndDisplayPictures(imgIDs, pictureIDName, pictureDivName)
-                // fadeElement(d3.select('#'+d.target.name+'Circle'), false);)
+                console.log(d);
+                maskElement(d3.selectAll("."+d.name+"Link"), true)
+                maskElement(d3.select('#'+d.name+'Circle'), true);
+                
             })
             .on("mouseout", (d) => {
                 TRANSITION_OFF = true;
-                // fadeElement(d3.select('#'+d.target.name+'Circle'), true);
+                maskElement(d3.select('#'+d.name+'Circle'), false);
+                maskElement(d3.selectAll("."+d.name+"Link"), false)
             });
         
         // This function is run at each iteration of the force algorithm, updating the nodes position.
@@ -154,7 +168,7 @@ const drawNetwork = (clientName, dataFileName, svg, pictureIDName, pictureDivNam
                     .id((d) => { return d.id; })                     // This provide  the id of a node
                     .links(networkData.links) 
                     .strength(() => {return 0;})                                   // and this the list of links
-            )
+                )
 
                 .on("tick", totalTicked)
                 .alphaTarget(0.1);
@@ -200,7 +214,9 @@ const processData = (clientName, data) => {
                 }
                 networkData['links'].push({
                     "source": getIDFromName(pw_row['client'], networkData['nodes']),
+                    "sourceName": pw_row['client'],
                     "target": getIDFromName(targetName, networkData['nodes']),
+                    "targetName": targetName,
                     "picIDs": pw_row[targetName]
                 });
             }
@@ -228,6 +244,19 @@ const fadeElement = (element, IN) => {
             .transition()
             .duration(300)
             .style('opacity', .8)
+    }  
+};
+
+const maskElement = (element, ON) => {
+    if (ON) {
+        element
+            .transition()
+            .duration(300)
+            .style('filter', 'brightness(85%)')
+    } else {
+        element
+            .transition()
+            .duration(300)
+            .style('filter', 'brightness(100%)')
     }
-    
 }

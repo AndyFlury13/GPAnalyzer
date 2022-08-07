@@ -23,9 +23,23 @@ body {
     overflow: hidden;
 }
 
+.authenticateSection {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1;
+}
+
 #authenticateButton {
-    z-index: -1;
+    background-color: rgba(66, 133, 244, 1);
+    border-radius: 25px;
+    padding: 20px;
+    z-index: 2;
     cursor: grab;
+    color: white;
+    font-size: 26px;
 }
 
 input, label,textarea {
@@ -157,8 +171,37 @@ input.question:invalid ~ input[type="submit"], textarea.question:invalid ~ input
 }
 
 .hdPwdInput {
-    margin: 50px;
+    position: relative;
+    left: -200px;
 }
+
+.overallStatsSection {
+    font-size: 39px;
+    margin: 20px;
+    line-height: 1.6;
+}
+
+.overallStatsSection > p {
+    position: relative;
+    top: 15%;
+}
+
+.introBlurb0 {
+    display: none;
+}
+
+.introBlurb1 {
+    display: none;
+}
+
+.introBlurb2 {
+    display: none;
+}
+
+.introBlurb3 {
+    display: none;
+}
+
 
 #monthGraphAndButtons {
     float: left;
@@ -333,4 +376,28 @@ input.question:invalid ~ input[type="submit"], textarea.question:invalid ~ input
 #totalGraph {
     height:100%;
     width:100%;
+}
+
+
+
+
+.userNumBar{
+  position: relative;
+  color: #666;
+  text-align: center;
+}
+.pplNum{
+    display: inline-block;
+    vertical-align: bottom;
+    /* font-size: 50px; */
+    line-height: 60px;
+    }    
+.digit-con, .comma{
+			height: 60px;
+			overflow: hidden;
+			display: inline-block;
+			vertical-align: bottom;
+}
+span {
+	position: relative;
 }

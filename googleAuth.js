@@ -1,3 +1,8 @@
+$(document).ready(function () {
+    $('.hdPwdInput').hide();
+    $('.scroller').hide();
+});
+
 /**
  * Sample JavaScript code for photoslibrary.mediaItems.get
  * See instructions for running APIs Explorer code samples locally:
@@ -12,10 +17,19 @@ const authenticate = () => {
 const loadClient = async () => {
     gapi.client.setApiKey(CREDENTIALS.apiKey);
     return gapi.client.load("https://photoslibrary.googleapis.com/$discovery/rest?version=v1")
-        .then(loadIconPhotos, (err) => { 
-            console.error("Error loading GAPI client for API", err); 
-        });
+        .then(
+            ()=> {
+                loadIconPhotos();
+                $("#authenticateButton").fadeOut(1000, () => {
+                    $(".hdPwdInput").fadeIn(1000);
+                });
+            }, 
+            (err) => { 
+                console.error("Error loading GAPI client for API", err); 
+            }
+        );
 }
+
 
 const loadIconPhotos = async () => { 
     console.log("GAPI client loaded for API"); 
@@ -54,10 +68,11 @@ const loadIconPhotos = async () => {
             console.error("Execute error", err);
         });
 }
+
 gapi.load("client:auth2", () => {
     gapi.auth2.init({client_id: CREDENTIALS.clientID});
 });
 
 $("#authenticateButton").click(() => {
-    authenticate().then(loadClient)
+    authenticate().then(loadClient);
 });

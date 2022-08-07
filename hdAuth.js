@@ -19,5 +19,12 @@ $('input').on('keypress', async (e) => {
         //     .then(data => {
         //         console.log(data);
         //     });
+        
+        $(".authenticateSection").fadeOut(1000, () => {
+            $(".scroller").fadeIn(100, () => {
+                displayStats(CLIENT_NAME);
+            });
+            
+        });
     }
 });

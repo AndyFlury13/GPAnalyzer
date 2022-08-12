@@ -65,7 +65,7 @@ const animatePicture = (urlToDisplay, photoIDName, photoDivName) => {
 };
 
 const drawBarGraph = (clientName, subjectOrTaker) => {
-  if (subjectOrTaker != CURRENT_SUBJECT_OR_TAKER) {
+  if (subjectOrTaker !== CURRENT_SUBJECT_OR_TAKER) {
     $('.slide-in-out-photoTaker').toggleClass('slide');
     $('.slide-in-out-subject').toggleClass('slide');
     CURRENT_SUBJECT_OR_TAKER = subjectOrTaker;

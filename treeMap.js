@@ -42,6 +42,7 @@ const clearTooltip = (div) => {
 
 const processCategoryData = (categoryName, categoryData, clientData) => {
   if (categoryName !== 'client') {
+    // console.log(categoryName);
     const numIDs = categoryData?.split(',')?.slice(0, -1)?.length ?? 0;
     if (numIDs !== 0) {
       clientData.children.push({
@@ -61,13 +62,15 @@ const drawTreeMap = (clientName) => {
     const clientData = {
       children: [],
     };
+    // console.log(data);
     data.forEach((row) => {
       if (row.client === clientName) {
-        Object.entries((categoryName, categoryData) => {
+        Object.entries(row).forEach(([categoryName, categoryData]) => {
           processCategoryData(categoryName, categoryData, clientData);
         });
       }
     });
+
     // Give the data to this cluster layout:
     const root = d3.hierarchy(clientData).sum((d) => d.value);
 
@@ -90,8 +93,9 @@ const drawTreeMap = (clientName) => {
       .style('fill', 'slateblue')
       .on('mouseenter', (d) => {
         const imgIDs = d.data.picIDs?.split(',')?.slice(0, -1) ?? [];
+        console.log(imgIDs);
         console.log('mouseenter');
-        loadAndDisplayPictures(imgIDs, 'categoryGraph', 'category');
+        loadAndDisplayPictures(imgIDs, 'categoryGraph', 'treeMap');
         drawTooltip(treeMapTooltip, d.data.name, d3.event.x, d3.event.y);
       })
       .on('mousemove', (d) => {

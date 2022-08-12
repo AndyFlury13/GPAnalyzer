@@ -38,23 +38,26 @@ const ICON_DATA = [];
 let defsLoaded = false;
 
 const getIDFromName = (name, nodeList) => {
+  let id = 'error';
   nodeList.forEach((node) => {
     if (name === node.name) {
-      return node.id;
+      id = node.id;
     }
-    return 'error';
   });
+  return id;
 };
 
 const processTarget = (targetName, targetData, clientName, networkData) => {
   if (targetName !== 'client' && targetName !== clientName) {
     networkData.links.push({
       source: getIDFromName(clientName, networkData.nodes),
-      sourceName: clientName.client,
+      sourceName: clientName,
       target: getIDFromName(targetName, networkData.nodes),
       targetName,
       picIDs: targetData,
     });
+    // eslint-disable-next-line no-param-reassign
+    networkData.nodes[getIDFromName(targetName, networkData.nodes)].picIDs = targetData;
   }
 };
 
@@ -67,17 +70,25 @@ const processData = (clientName, data) => {
     });
   });
 
-  const mostPicIDs = Math.max(...Object.values(data).forEach(
-    (pwRow) => Math.max(
-      ...Object.values(pwRow).forEach(
-        (targetData) => targetData.split('\n,').slice(0, -1).length,
-      ),
-    ),
+  const mostPicIDs = Math.max(...data.map(
+    (pwRow) => {
+      if (pwRow.client === clientName || clientName === 'total') {
+        return Math.max(
+          ...Object.entries(pwRow).map(([targetName, targetData]) => {
+            if (targetName !== 'client') {
+              return targetData.split('\n,').slice(0, -1).length;
+            }
+            return 0;
+          }),
+        );
+      }
+      return 0;
+    },
   ));
   data.forEach((pwRow) => {
-    if (pwRow.client === clientName || clientName === 'total') {
-      Object.entries(pwRow).forEach((targetName, targetData) => {
-        processTarget(targetName, targetData, clientName, networkData);
+    if (clientName === pwRow.client || clientName === 'total') {
+      Object.entries(pwRow).forEach(([targetName, targetData]) => {
+        processTarget(targetName, targetData, pwRow.client, networkData);
       });
     }
   });
@@ -103,6 +114,7 @@ const drawNetwork = (clientName, dataFileName, svg, pictureIDName, pictureDivNam
     const dataAndMostPicIds = processData(clientName, data);
     const { mostPicIDs } = dataAndMostPicIds;
     const networkData = dataAndMostPicIds.data;
+    // console.log(networkData);
     const maxLinkWidth = 10;
     // Initialize the links
     const networkDataLink = svg
@@ -114,18 +126,19 @@ const drawNetwork = (clientName, dataFileName, svg, pictureIDName, pictureDivNam
       .style('stroke', '#aaa')
       .style('stroke-width', (d) => {
         const numPicIDs = d.picIDs?.split('\n,')?.slice(0, -1)?.length ?? 1;
-        const width = Math.ceil((maxLinkWidth * numPicIDs) / mostPicIDs);
+        const width = Math.ceil((maxLinkWidth * (numPicIDs + 1)) / mostPicIDs);
         return width;
       })
       .on('mouseover', (d) => {
-        const imgIDs = d.picIDs?.split('\n,')?.slice(0, -1) ?? [];
-        loadAndDisplayPictures(imgIDs, pictureIDName, pictureDivName);
-        console.log(d);
-        maskElement(d3.selectAll(`.${d.targetName}Link`), true);
-        maskElement(d3.selectAll(`.${d.targetName}Circle`), true);
-        if (clientName === 'total') {
+        if (clientName !== 'total') {
+          const imgIDs = d.picIDs?.split('\n,')?.slice(0, -1) ?? [];
+          console.log(imgIDs);
+          loadAndDisplayPictures(imgIDs, pictureIDName, pictureDivName);
+        } else {
           maskElement(d3.selectAll(`.${d.sourceName}Circle`), true);
         }
+        maskElement(d3.selectAll(`.${d.targetName}Link`), true);
+        maskElement(d3.selectAll(`.${d.targetName}Circle`), true);
       })
       .on('mouseout', (d) => {
         TRANSITION_OFF = true;
@@ -168,9 +181,12 @@ const drawNetwork = (clientName, dataFileName, svg, pictureIDName, pictureDivNam
       .attr('r', (0.9 * config.avatar_size) / 2)
       .style('fill', (d) => `url(#${d.name}_icon)`)
       .on('mouseover', (d) => {
-        const imgIDs = d.picIDs?.split('\n,')?.slice(0, -1) ?? [];
-        loadAndDisplayPictures(imgIDs, pictureIDName, pictureDivName);
-        console.log(d);
+        if (clientName !== 'total') {
+          const imgIDs = d.picIDs?.split('\n,')?.slice(0, -1) ?? [];
+          loadAndDisplayPictures(imgIDs, pictureIDName, pictureDivName);
+          console.log(d);
+        }
+
         maskElement(d3.selectAll(`.${d.name}Link`), true);
         maskElement(d3.selectAll(`.${d.name}Circle`), true);
       })

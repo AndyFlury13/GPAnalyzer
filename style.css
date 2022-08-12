@@ -205,7 +205,7 @@ input.question:invalid ~ input[type="submit"], textarea.question:invalid ~ input
 
 #monthGraphAndButtons {
     float: left;
-    width: 50vw;
+    width: 50%;
     display: grid;
     margin:auto;
 }
@@ -377,9 +377,6 @@ input.question:invalid ~ input[type="submit"], textarea.question:invalid ~ input
     height:100%;
     width:100%;
 }
-
-
-
 
 .userNumBar{
   position: relative;

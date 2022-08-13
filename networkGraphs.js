@@ -132,7 +132,6 @@ const drawNetwork = (clientName, dataFileName, svg, pictureIDName, pictureDivNam
       .on('mouseover', (d) => {
         if (clientName !== 'total') {
           const imgIDs = d.picIDs?.split('\n,')?.slice(0, -1) ?? [];
-          console.log(imgIDs);
           loadAndDisplayPictures(imgIDs, pictureIDName, pictureDivName);
         } else {
           maskElement(d3.selectAll(`.${d.sourceName}Circle`), true);

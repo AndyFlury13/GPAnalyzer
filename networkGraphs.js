@@ -76,7 +76,7 @@ const processData = (clientName, data) => {
         return Math.max(
           ...Object.entries(pwRow).map(([targetName, targetData]) => {
             if (targetName !== 'client') {
-              return targetData.split('\n,').slice(0, -1).length;
+              return targetData.split(',').slice(0, -1).length;
             }
             return 0;
           }),
@@ -125,13 +125,13 @@ const drawNetwork = (clientName, dataFileName, svg, pictureIDName, pictureDivNam
       .attr('class', (d) => `${d.sourceName}Link ${d.targetName}Link`)
       .style('stroke', '#aaa')
       .style('stroke-width', (d) => {
-        const numPicIDs = d.picIDs?.split('\n,')?.slice(0, -1)?.length ?? 1;
+        const numPicIDs = d.picIDs?.split(',')?.slice(0, -1)?.length ?? 1;
         const width = Math.ceil((maxLinkWidth * (numPicIDs + 1)) / mostPicIDs);
         return width;
       })
       .on('mouseover', (d) => {
         if (clientName !== 'total') {
-          const imgIDs = d.picIDs?.split('\n,')?.slice(0, -1) ?? [];
+          const imgIDs = d.picIDs?.split(',')?.slice(0, -1) ?? [];
           loadAndDisplayPictures(imgIDs, pictureIDName, pictureDivName);
         } else {
           maskElement(d3.selectAll(`.${d.sourceName}Circle`), true);
@@ -181,7 +181,7 @@ const drawNetwork = (clientName, dataFileName, svg, pictureIDName, pictureDivNam
       .style('fill', (d) => `url(#${d.name}_icon)`)
       .on('mouseover', (d) => {
         if (clientName !== 'total') {
-          const imgIDs = d.picIDs?.split('\n,')?.slice(0, -1) ?? [];
+          const imgIDs = d.picIDs?.split(',')?.slice(0, -1) ?? [];
           loadAndDisplayPictures(imgIDs, pictureIDName, pictureDivName);
           console.log(d);
         }

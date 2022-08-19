@@ -1,5 +1,10 @@
 /* global displayStats, CLIENT_NAME */
 
+$(document).keypress((e) => {
+  $('input').trigger('focus'); // you can trigger keypress like this if you need to..
+  // .val((i, val) => `${val}a`);
+});
+
 $('input').on('keypress', async (e) => {
   // e.preventDefault();
   const code = e.keyCode || e.which;

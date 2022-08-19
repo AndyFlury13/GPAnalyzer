@@ -56,6 +56,8 @@ const loadIconPhotos = async () => {
           });
         }
       });
+      $('.loader').fadeOut();
+      $('.hdPwdInput').fadeIn(1000);
     }, (err) => {
       console.error('Execute error', err);
     });
@@ -67,9 +69,6 @@ const loadClient = async () => {
     .then(
       () => {
         loadIconPhotos();
-        $('#authenticateButton').fadeOut(1000, () => {
-          $('.hdPwdInput').fadeIn(1000);
-        });
       },
       (err) => {
         console.error('Error loading GAPI client for API', err);
@@ -83,4 +82,7 @@ gapi.load('client:auth2', () => {
 
 $('#authenticateButton').click(() => {
   authenticate().then(loadClient);
+  $('#authenticateButton').fadeOut();
+  $('.loader').fadeIn();
+  // $('#authenticateButton').css('cursor', 'default');
 });

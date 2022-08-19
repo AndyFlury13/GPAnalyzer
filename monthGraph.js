@@ -115,6 +115,7 @@ const drawBarGraph = (clientName, subjectOrTaker) => {
         .append('rect')
         .on('mouseover', (d, i, n) => {
           const imgIDs = d[CURRENT_SUBJECT_OR_TAKER].split(',').slice(0, -1);
+          $('.explanation').fadeOut();
           loadAndDisplayPictures(imgIDs, 'monthGraph', 'month');
           fadeElement(d3.select(n[i]), false);
         })

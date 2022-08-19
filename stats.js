@@ -40,9 +40,11 @@ const displayStats = async (clientName) => {
         $('.introBlurb1').html("You uploaded <span class='userNumBar1'></span><span class='userImgNumBar'></span> pictures,").promise().done(() => {
           $('.introBlurb1').fadeIn(3000, () => {
             $('.introBlurb2').html("and appeared in <span class='userNumBar2'></span><span class='userImgNumBar'></span>.<br>").promise().done(() => {
-              $('.introBlurb2').fadeIn(3000, () => {
+              $('.introBlurb2').fadeIn(4000, () => {
                 $('.introBlurb3').html("Let's take a look at some of them.").promise().done(() => {
-                  $('.introBlurb3').fadeIn(2000);
+                  $('.introBlurb3').fadeIn(2000, () => {
+                    $('.downArrow').fadeIn(500);
+                  });
                 });
               });
               counterControl($('.userNumBar2'), data[clientName].asSubject);

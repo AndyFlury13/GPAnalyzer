@@ -95,16 +95,84 @@ const processData = (clientName, data) => {
   return { data: networkData, mostPicIDs };
 };
 
-const maskElement = (element, ON) => {
-  if (ON) {
-    element
+const highlightLink = (sourceName, targetName, on, totalGraph) => {
+  if (on) {
+    if (totalGraph) {
+      d3.selectAll('.link')
+        .filter((d) => !((d.sourceName === sourceName && d.targetName === targetName)
+        || (d.sourceName === targetName && d.targetName === sourceName)))
+        .transition()
+        .duration(400)
+        .style('opacity', 0.2);
+    } else {
+      d3.selectAll('.link')
+        .filter((d) => !((d.sourceName === sourceName && d.targetName === targetName)
+        || (d.sourceName === targetName && d.targetName === sourceName)))
+        .transition()
+        .duration(400)
+        .style('filter', 'brightness(60%)');
+    }
+    d3.selectAll('.node')
+      .filter((d) => !(d.name === sourceName || d.name === targetName))
       .transition()
-      .duration(200)
-      .style('filter', 'brightness(85%)');
+      .duration(400)
+      .style('filter', 'brightness(60%)');
   } else {
-    element
+    if (totalGraph) {
+      d3.selectAll('.link')
+        .transition()
+        .duration(400)
+        .style('opacity', 1);
+    } else {
+      d3.selectAll('.link')
+        .transition()
+        .duration(400)
+        .style('filter', 'brightness(100%)');
+    }
+
+    d3.selectAll('.node')
       .transition()
-      .duration(200)
+      .duration(400)
+      .style('filter', 'brightness(100%)');
+  }
+};
+
+const highlightNode = (nodeName, clientName, on, totalGraph) => {
+  if (on) {
+    if (totalGraph) {
+      d3.selectAll('.link')
+        .filter((d) => !(d.sourceName === nodeName || d.targetName === nodeName))
+        .transition()
+        .duration(400)
+        .style('opacity', 0.2);
+    } else {
+      d3.selectAll('.node')
+        .filter((d) => !(d.name === nodeName || d.name === clientName))
+        .transition()
+        .duration(400)
+        .style('filter', 'brightness(60%)');
+      d3.selectAll('.link')
+        .filter((d) => !((d.sourceName === nodeName && d.targetName === clientName)
+        || (d.sourceName === clientName && d.targetName === nodeName)))
+        .transition()
+        .duration(400)
+        .style('filter', 'brightness(60%)');
+    }
+  } else {
+    if (totalGraph) {
+      d3.selectAll('.link')
+        .transition()
+        .duration(400)
+        .style('opacity', 1);
+    } else {
+      d3.selectAll('.link')
+        .transition()
+        .duration(400)
+        .style('filter', 'brightness(100%)');
+    }
+    d3.selectAll('.node')
+      .transition()
+      .duration(400)
       .style('filter', 'brightness(100%)');
   }
 };
@@ -122,7 +190,8 @@ const drawNetwork = (clientName, dataFileName, svg, pictureIDName, pictureDivNam
       .data(networkData.links)
       .enter()
       .append('line')
-      .attr('class', (d) => `${d.sourceName}Link ${d.targetName}Link`)
+      .classed((d) => `${d.sourceName}Link ${d.targetName}Link`, true)
+      .classed('link', true)
       .style('stroke', '#aaa')
       .style('stroke-width', (d) => {
         const numPicIDs = d.picIDs?.split(',')?.slice(0, -1)?.length ?? 1;
@@ -133,19 +202,14 @@ const drawNetwork = (clientName, dataFileName, svg, pictureIDName, pictureDivNam
         if (clientName !== 'total') {
           const imgIDs = d.picIDs?.split(',')?.slice(0, -1) ?? [];
           loadAndDisplayPictures(imgIDs, pictureIDName, pictureDivName);
+          highlightLink(d.sourceName, d.targetName, true, false);
         } else {
-          maskElement(d3.selectAll(`.${d.sourceName}Circle`), true);
+          highlightLink(d.sourceName, d.targetName, true, true);
         }
-        maskElement(d3.selectAll(`.${d.targetName}Link`), true);
-        maskElement(d3.selectAll(`.${d.targetName}Circle`), true);
       })
-      .on('mouseout', (d) => {
+      .on('mouseout', () => {
         TRANSITION_OFF = true;
-        maskElement(d3.selectAll(`.${d.targetName}Link`), false);
-        maskElement(d3.selectAll(`.${d.targetName}Circle`), false);
-        if (clientName === 'total') {
-          maskElement(d3.selectAll(`.${d.sourceName}Circle`), false);
-        }
+        highlightLink(null, null, false, clientName === 'total');
       });
     const config = {
       avatar_size: 130, // define the size of the circle radius
@@ -176,23 +240,23 @@ const drawNetwork = (clientName, dataFileName, svg, pictureIDName, pictureDivNam
       .data(networkData.nodes)
       .enter()
       .append('circle')
-      .attr('class', (d) => `${d.name}Circle`)
+      .classed((d) => `${d.name}Circle`, true)
+      .classed('node', true)
       .attr('r', (0.9 * config.avatar_size) / 2)
       .style('fill', (d) => `url(#${d.name}_icon)`)
       .on('mouseover', (d) => {
         if (clientName !== 'total') {
           const imgIDs = d.picIDs?.split(',')?.slice(0, -1) ?? [];
           loadAndDisplayPictures(imgIDs, pictureIDName, pictureDivName);
-          console.log(d);
+          highlightNode(d.name, clientName, true, false);
+        } else {
+          highlightNode(d.name, clientName, true, true);
         }
-
-        maskElement(d3.selectAll(`.${d.name}Link`), true);
-        maskElement(d3.selectAll(`.${d.name}Circle`), true);
       })
-      .on('mouseout', (d) => {
+      .on('mouseout', () => {
         TRANSITION_OFF = true;
-        maskElement(d3.selectAll(`.${d.name}Circle`), false);
-        maskElement(d3.selectAll(`.${d.name}Link`), false);
+
+        highlightNode(null, null, false, clientName === 'total');
       });
 
     // This function is run at each iteration of the force algorithm, updating the nodes position.

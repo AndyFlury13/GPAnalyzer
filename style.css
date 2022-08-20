@@ -2,10 +2,12 @@ html *
 {
    font-size: 1em;
    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif !important;
+   
 }
 
 body {
     height: 100vh;
+    overflow: hidden;
 }
 
 .scroller {
@@ -291,7 +293,7 @@ input.question:invalid ~ input[type="submit"], textarea.question:invalid ~ input
     position: absolute;
     left: 50%;
     display:none;
- 
+    cursor: pointer;
     bottom: 0px;
 }
 .bounce {

@@ -8,8 +8,10 @@
     </head>
 
     <body>
+        
         <div class="authenticateSection">
-            <div class='userNumBar'></div><br><br><div class='userImgNumBar'></div>
+
+            
             <div id="authenticateButton">Okay first off, sign-in with Google</div>
             
             <div class="loader">
@@ -41,6 +43,7 @@
             </div>
         </div>  
         <article class="scroller">
+            
             <section class="overallStatsSection">
                 <p>
                     <span class="introBlurb0 blurbs"></span>
@@ -65,9 +68,10 @@
                     <div class="explanation">Hover over the graph elements to load images</div>
                 </div>
             </section>
-
             <section class="treeMapSection">
-                <div id="treeMapPhotos" class="photoContainer"></div>
+                <div id="treeMapPhotos" class="photoContainer">
+                    <div class="explanation">Hover over the graph elements to load images</div>
+                </div>
                 <div id="treeMap"></div>
             </section>
             <section class="statsSection">
@@ -83,17 +87,22 @@
             </section>
             <section class="clientTakerSubjectSection">
                 <div id="clientTakerSubjectGraph"></div>
-                <div class="photoContainer" id="clientTakerSubjectPhotos"></div>
+                <div class="photoContainer" id="clientTakerSubjectPhotos">
+                    <div class="explanation">Hover over the graph elements to load images</div>
+                </div>
                 
             </section>
             <section class="clientPicturedWithSection">
-                <div class="photoContainer" id="clientPicturedWithPhotos"></div>
+                <div class="photoContainer" id="clientPicturedWithPhotos">
+                    <div class="explanation">Hover over the graph elements to load images</div>
+                </div>
                 <div id="clientPicturedWithGraph"></div>
             </section>
             <section class="totalGraph">
                 <div id="totalGraph"></div>
             </section>
         </article>
+        <script src="/imageLoader.js" type="text/javascript"></script>
         <script src="/monthGraph.js" type="text/javascript"></script>
         <script src="/credentials.js" type="text/javascript"></script>
         <script src="/googleAuth.js" type="text/javascript"></script>
@@ -102,5 +111,6 @@
         <script src="/treeMap.js" type="text/javascript"></script>
         <script src="/stats.js" type="text/javascript"></script>
         <script src="/top3Stats.js" type="text/javascript"></script>
+
     </body>
 </html>

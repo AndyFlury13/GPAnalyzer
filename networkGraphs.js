@@ -249,13 +249,13 @@ const drawNetwork = (clientName, dataFileName, svg, pictureIDName, pictureDivNam
           const imgIDs = d.picIDs?.split(',')?.slice(0, -1) ?? [];
           loadAndDisplayPictures(imgIDs, pictureIDName, pictureDivName);
           highlightNode(d.name, clientName, true, false);
+          $('.explanation').fadeOut();
         } else {
           highlightNode(d.name, clientName, true, true);
         }
       })
       .on('mouseout', () => {
         TRANSITION_OFF = true;
-
         highlightNode(null, null, false, clientName === 'total');
       });
 

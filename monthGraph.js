@@ -1,3 +1,5 @@
+/* global loadAndDisplayPictures */
+
 const MONTHS = ['August', 'September', 'October', 'November', 'December', 'January', 'February', 'March', 'April', 'May', 'June'];
 const shortenedMonths = ['Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
 const CLIENT_NAME = 'me';
@@ -5,7 +7,7 @@ let USER;
 let SUBJECT_OR_TAKER;
 let CURRENT_SUBJECT_OR_TAKER = 'photoTaker';
 let TRANSITION_OFF = true;
-const IMG_CONTAINER_REF = [];
+
 $('.slide-in-out-photoTaker').toggleClass('slide');
 
 // var monthGraphMargin = {top: 30, right: 30, bottom: 70, left: 60},
@@ -53,15 +55,6 @@ const fadeElement = (element, IN) => {
       .duration(300)
       .style('opacity', 0.8);
   }
-};
-
-const animatePicture = (urlToDisplay, photoIDName, photoDivName) => {
-  IMG_CONTAINER_REF[0] = ($(`<img class='displayedPhoto' id='${photoIDName}Photo' src='${urlToDisplay}'/>`).prependTo(`#${photoDivName}Photos`));
-  $(`#${photoIDName}Photo`).on('load', () => {
-    $(`#${photoIDName}Photo`).animate({
-      opacity: 1,
-    }, 400);
-  });
 };
 
 const drawBarGraph = (clientName, subjectOrTaker) => {
@@ -115,8 +108,8 @@ const drawBarGraph = (clientName, subjectOrTaker) => {
         .append('rect')
         .on('mouseover', (d, i, n) => {
           const imgIDs = d[CURRENT_SUBJECT_OR_TAKER].split(',').slice(0, -1);
-          $('.explanation').fadeOut();
-          loadAndDisplayPictures(imgIDs, 'monthGraph', 'month');
+          // loadAndDisplayPictures(imgIDs, 'monthGraph', 'month');
+          slideshow(imgIDs, 'month');
           fadeElement(d3.select(n[i]), false);
         })
         .on('mouseout', (_, i, n) => {
@@ -137,49 +130,3 @@ const drawBarGraph = (clientName, subjectOrTaker) => {
 };
 
 drawBarGraph(CLIENT_NAME, 'photoTaker');
-
-const loadAndDisplayPictures = (imgIDs, pictureIDName, pictureDivName) => {
-  TRANSITION_OFF = false;
-  let timer = 0;
-  let imgIDsI = 0;
-  return gapi.client.photoslibrary.mediaItems.get({ // initial load
-    mediaItemId: imgIDs[imgIDsI],
-  }).then((response) => {
-    let urlToDisplay = response.result.baseUrl;
-    IMG_CONTAINER_REF[0]?.remove();
-    animatePicture(urlToDisplay, pictureIDName, pictureDivName);
-    const imgCycler = setInterval(() => {
-      if (timer > 350) {
-        timer = 0;
-        console.log('image change!');
-        imgIDsI += 1;
-        if (imgIDsI === imgIDs.length) {
-          imgIDsI = 0;
-        }
-        $(`#${pictureIDName}Photo`).animate({
-          opacity: 0,
-        }, 400, () => {
-          IMG_CONTAINER_REF[0].remove();
-          gapi.client.photoslibrary.mediaItems.get({ // initial load
-            mediaItemId: imgIDs[imgIDsI],
-          }).then((nextResponse) => {
-            urlToDisplay = nextResponse.result.baseUrl;
-            animatePicture(urlToDisplay, pictureIDName, pictureDivName);
-          }, (err) => {
-            console.err('GP request err:', err);
-          });
-        });
-      } else if (TRANSITION_OFF) {
-        clearInterval(imgCycler);
-        $(`#${pictureIDName}Photo`).animate({
-          opacity: 0,
-        }, 400, () => {
-          IMG_CONTAINER_REF[0].remove();
-        });
-      }
-      timer += 1;
-    }, 10);
-  }, (err) => {
-    console.error('GP load error:', err);
-  });
-};

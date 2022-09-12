@@ -12,7 +12,6 @@ $(document).ready(() => {
   $('.hdPwdInput').hide();
   $('.scroller').hide();
 });
-
 /**
  * Sample JavaScript code for photoslibrary.mediaItems.get
  * See instructions for running APIs Explorer code samples locally:
@@ -84,5 +83,4 @@ $('#authenticateButton').click(() => {
   authenticate().then(loadClient);
   $('#authenticateButton').fadeOut();
   $('.loader').fadeIn();
-  // $('#authenticateButton').css('cursor', 'default');
 });

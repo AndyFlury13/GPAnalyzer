@@ -1,5 +1,17 @@
-/* global loadAndDisplayPictures, CLIENT_NAME */
-
+/* global
+  slideshow,
+  CLIENT_NAME,
+  deleteLedgerItem,
+  LEDGER,
+  imgListener,
+  TRANSITION_OFF
+*/
+const TREE_MAP_ON_CONTAINER = [false];
+const TREE_MAP_IMG_CHANGE_CONTAINER = [true];
+let TREE_MAP_PROMISE = new Promise((resolve) => {
+  resolve(TREE_MAP_IMG_CHANGE_CONTAINER[0]);
+});
+let DISPLAYED_CATEGORY = '';
 const treeMapWidth = 750;
 const treeMapHeight = 580;
 const CATEGORIES = [
@@ -33,6 +45,7 @@ const treeMapSVG = d3.select('#treeMap')
   .attr('height', treeMapHeight + treeMapMargin.top + treeMapMargin.bottom)
   .attr('width', treeMapWidth + treeMapMargin.left + treeMapMargin.left)
   .append('g')
+  .attr('id', 'treeMapG')
   .attr('transform', `translate(${treeMapMargin.left},${treeMapMargin.top})`);
 
 const treeMapTooltip = d3.select('body')
@@ -52,24 +65,49 @@ const drawTooltip = (div, text, x, y) => {
     .style('top', `${y}px`);
 };
 
-const getLength = (data, name, dimension) => {
-  let length = 0;
-  data.forEach((d) => {
-    if (d.data.name === name) {
-      if (dimension === 'width') {
-        length += d.x1 - d.x0;
-      } else {
-        length += d.y1 - d.y0;
-      }
-    }
-  });
-  if (length === 0) {
-    return 13;
+const highlightRectangles = (className, oldCategory, newCategory) => {
+  console.log(newCategory, oldCategory);
+  if (oldCategory === 'none') {
+    d3.selectAll(`.${className}`)
+      .filter((d) => {
+        if (className === 'treeMap') {
+          return newCategory !== d.data.name;
+        }
+        return newCategory !== d.month;
+      })
+      .transition()
+      .duration(1000)
+      .style('filter', 'grayscale(100%)');
+  } else if (oldCategory === newCategory) {
+    d3.selectAll(`.${className}`)
+      .transition()
+      .duration(1000)
+      .style('filter', 'grayscale(0%)');
+  } else {
+    d3.selectAll(`.${className}`)
+      .filter((d) => {
+        if (className === 'treeMap') {
+          return newCategory === d.data.name;
+        }
+        return newCategory === d.month;
+      })
+      .transition()
+      .duration(1000)
+      .style('filter', 'grayscale(0%)');
+    d3.selectAll(`.${className}`)
+      .filter((d) => {
+        if (className === 'treeMap') {
+          return newCategory !== d.data.name;
+        }
+        return newCategory !== d.month;
+      })
+      .transition()
+      .duration(1000)
+      .style('filter', 'grayscale(100%)');
   }
-  return length;
 };
 
-const createTreemapDefs = (data) => {
+const createTreemapDefs = () => {
   const imageLength = 15;
   const patternLength = imageLength * 2.5;
   const body = d3.select('body');
@@ -78,45 +116,18 @@ const createTreemapDefs = (data) => {
   CATEGORIES.forEach((entry) => {
     defs.append('svg:pattern')
       .attr('id', `${entry.name}_icon`)
-      .attr('height', () =>
-      // const branchHeight = getLength(data, entry.name, 'height');
-
-        // const numIcons = branchHeight / (imageLength * entry.sizeModifier);
-        // console.log(branchHeight);
-        // return 1 / numIcons;
-        patternLength)
-      .attr('width', () =>
-        // const branchWidth = getLength(data, entry.name, 'width');
-        // const numIcons = branchWidth / (imageLength * entry.sizeModifier);
-        // return 1 / numIcons;
-        patternLength)
-      .attr('x', () =>
-        // const branchWidth = getLength(data, entry.name, 'width');
-        // const numIcons = branchWidth / (imageLength * entry.sizeModifier);
-        // return (branchWidth - numIcons * (imageLength * entry.sizeModifier)) / 2;
-        5) // center patterns
-      .attr('y', () =>
-        // const branchHeight = getLength(data, entry.name, 'height');
-        // const numIcons = branchHeight / (imageLength * entry.sizeModifier);
-        // return (branchHeight - numIcons * (imageLength * entry.sizeModifier)) / 2;
-        5)
-      // .attr('patternUnits', 'userSpaceOnUse')
+      .attr('height', () => patternLength)
+      .attr('width', () => patternLength)
+      .attr('x', () => 5) // center patterns
+      .attr('y', () => 5)
       .attr('patternUnits', 'userSpaceOnUse')
       .append('svg:image')
       .attr('href', `/treemapPics/modified/${entry.name}_modified.png`)
-      .attr('height', () =>
-      // const branchHeight = getLength(data, entry.name, 'height');
-
-        // const numIcons = branchHeight / patternLength;
-        // console.log(branchHeight);
-        // return 1 / numIcons;
-        imageLength * entry.sizeModifier)
-      .attr('width', () =>
-        // const branchWidth = getLength(data, entry.name, 'width');
-        // const numIcons = branchWidth / (patternLength);
-        // return 1 / numIcons;
-        imageLength * entry.sizeModifier);
+      .attr('height', () => imageLength * entry.sizeModifier)
+      .attr('width', () => imageLength * entry.sizeModifier);
   });
+
+  return defs;
 };
 
 const clearTooltip = (div) => {
@@ -182,6 +193,7 @@ const drawTreeMap = (clientName) => {
       .enter();
     selection
       .append('rect')
+      .classed('treeMapRect', true)
       .attr('x', (d) => d.x0)
       .attr('y', (d) => d.y0)
       .attr('width', (d) => d.x1 - d.x0)
@@ -190,27 +202,48 @@ const drawTreeMap = (clientName) => {
       .style('fill', (d) => getColor(d.data.name));
     selection
       .append('rect')
+      .classed('treeMapRect', true)
       .attr('x', (d) => d.x0)
       .attr('y', (d) => d.y0)
       .attr('width', (d) => d.x1 - d.x0)
       .attr('height', (d) => d.y1 - d.y0)
       .style('stroke', '#E4E5EA')
+      .style('cursor', 'pointer')
       .style('fill', (d) => `url(#${d.data.name}_icon)`)
       .on('mouseenter', (d) => {
-        const imgIDs = d.data.picIDs?.split(',')?.slice(0, -1) ?? [];
-        console.log('mouseenter');
-        $('.explanation').fadeOut();
-        // loadAndDisplayPictures(imgIDs, 'categoryGraph', 'treeMap');
         drawTooltip(treeMapTooltip, d.data.name, d3.event.x, d3.event.y);
       })
       .on('mousemove', (d) => {
-        console.log('mousemove');
         drawTooltip(treeMapTooltip, d.data.name, d3.event.x, d3.event.y);
       })
       .on('mouseleave', () => {
-        console.log('mouseleave');
-        TRANSITION_OFF = true;
         clearTooltip(treeMapTooltip);
+      })
+      .on('click', (d) => {
+        const imgIDs = d.data.picIDs?.split(',')?.slice(0, -1) ?? [];
+        if (d.data.name === DISPLAYED_CATEGORY) {
+          TREE_MAP_IMG_CHANGE_CONTAINER[0] = false;
+          TREE_MAP_ON_CONTAINER[0] = false;
+          DISPLAYED_CATEGORY = '';
+          $('.explanation').fadeIn();
+          highlightRectangles('treeMap', d.data.name, d.data.name);
+        } else {
+          if (DISPLAYED_CATEGORY === '') {
+            highlightRectangles('treeMap', 'none', d.data.name);
+          } else if (DISPLAYED_CATEGORY !== d.data.name) {
+            highlightRectangles('treeMap', DISPLAYED_CATEGORY, d.data.name);
+          }
+          TREE_MAP_IMG_CHANGE_CONTAINER[0] = true;
+          $('.explanation').fadeOut('fast');
+          TREE_MAP_ON_CONTAINER[0] = false;
+          DISPLAYED_CATEGORY = d.data.name;
+          TREE_MAP_PROMISE.then(() => {
+            TREE_MAP_ON_CONTAINER[0] = true;
+            if (TREE_MAP_IMG_CHANGE_CONTAINER[0]) {
+              TREE_MAP_PROMISE = slideshow('treeMap', imgIDs, TREE_MAP_ON_CONTAINER);
+            }
+          });
+        }
       });
   });
 };

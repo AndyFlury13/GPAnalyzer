@@ -247,7 +247,7 @@ const drawNetwork = (clientName, dataFileName, svg, pictureIDName, pictureDivNam
       .on('mouseover', (d) => {
         if (clientName !== 'total') {
           const imgIDs = d.picIDs?.split(',')?.slice(0, -1) ?? [];
-          loadAndDisplayPictures(imgIDs, pictureIDName, pictureDivName);
+
           highlightNode(d.name, clientName, true, false);
           $('.explanation').fadeOut();
         } else {

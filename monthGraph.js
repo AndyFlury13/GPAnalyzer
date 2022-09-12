@@ -1,12 +1,17 @@
-/* global loadAndDisplayPictures */
+/* global slideshow, highlightRectangles */
 
 const MONTHS = ['August', 'September', 'October', 'November', 'December', 'January', 'February', 'March', 'April', 'May', 'June'];
 const shortenedMonths = ['Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
 const CLIENT_NAME = 'me';
+let DISPLAYED_MONTH = '';
 let USER;
+const MONTH_IMG_CHANGE_CONTAINER = [true];
+const MONTH_ON_CONTAINER = [false];
+let MONTH_PROMISE = new Promise((resolve) => {
+  resolve(MONTH_IMG_CHANGE_CONTAINER[0]);
+});
 let SUBJECT_OR_TAKER;
 let CURRENT_SUBJECT_OR_TAKER = 'photoTaker';
-let TRANSITION_OFF = true;
 
 $('.slide-in-out-photoTaker').toggleClass('slide');
 
@@ -42,20 +47,6 @@ const monthGraphY = d3.scaleLinear()
 
 const monthGraphYAxis = monthGraphSVG.append('g')
   .attr('class', 'monthGraphYAxis');
-
-const fadeElement = (element, IN) => {
-  if (IN) {
-    element
-      .transition()
-      .duration(300)
-      .style('opacity', 1);
-  } else {
-    element
-      .transition()
-      .duration(300)
-      .style('opacity', 0.8);
-  }
-};
 
 const drawBarGraph = (clientName, subjectOrTaker) => {
   if (subjectOrTaker !== CURRENT_SUBJECT_OR_TAKER) {
@@ -106,16 +97,33 @@ const drawBarGraph = (clientName, subjectOrTaker) => {
       u
         .enter()
         .append('rect')
-        .on('mouseover', (d, i, n) => {
-          const imgIDs = d[CURRENT_SUBJECT_OR_TAKER].split(',').slice(0, -1);
-          // loadAndDisplayPictures(imgIDs, 'monthGraph', 'month');
-          slideshow(imgIDs, 'month');
-          fadeElement(d3.select(n[i]), false);
-        })
-        .on('mouseout', (_, i, n) => {
-          TRANSITION_OFF = true;
-          console.log('mouseout');
-          fadeElement(d3.select(n[i]), true);
+        .classed('monthRect', true)
+        .style('cursor', 'pointer')
+        .on('click', (d) => {
+          const imgIDs = d[CURRENT_SUBJECT_OR_TAKER]?.split(',')?.slice(0, -1) ?? [];
+          if (d.month === DISPLAYED_MONTH) {
+            MONTH_IMG_CHANGE_CONTAINER[0] = false;
+            MONTH_ON_CONTAINER[0] = false;
+            DISPLAYED_MONTH = '';
+            $('.explanation').fadeIn();
+            highlightRectangles('monthRect', d.month, d.month);
+          } else {
+            if (DISPLAYED_MONTH === '') {
+              highlightRectangles('monthRect', 'none', d.month);
+            } else if (DISPLAYED_MONTH !== d.month) {
+              highlightRectangles('monthRect', DISPLAYED_MONTH, d.month);
+            }
+            MONTH_IMG_CHANGE_CONTAINER[0] = true;
+            $('.explanation').fadeOut('fast');
+            MONTH_ON_CONTAINER[0] = false;
+            DISPLAYED_MONTH = d.month;
+            MONTH_PROMISE.then(() => {
+              MONTH_ON_CONTAINER[0] = true;
+              if (MONTH_IMG_CHANGE_CONTAINER[0]) {
+                MONTH_PROMISE = slideshow('month', imgIDs, MONTH_ON_CONTAINER);
+              }
+            });
+          }
         })
         .merge(u)
         .transition()

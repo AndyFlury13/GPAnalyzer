@@ -43,9 +43,9 @@ const loadIconPhotos = async () => {
                 url: mediaItem.baseUrl,
               });
             });
-            drawNetwork(CLIENT_NAME, 'picturedWith', clientPicturedWithSVG, 'clientPicturedWithGraph', 'clientPicturedWith');
-            drawNetwork(CLIENT_NAME, 'takerSubject', clientTakerSubjectSVG, 'clientTakerSubjectGraph', 'clientTakerSubject');
-            drawNetwork('total', 'picturedWIth', totalPicturedWithSVG, 'null', 'null');
+            drawNetwork(CLIENT_NAME, 'picturedWith', clientPicturedWithSVG, 'clientPicturedWith');
+            drawNetwork(CLIENT_NAME, 'takerSubject', clientTakerSubjectSVG, 'clientTakerSubject');
+            drawNetwork('totalPW', 'picturedWith', totalPicturedWithSVG, 'totalPW');
             // TODO
             while ('nextPageToken' in mediaResponse) {
               console.log('todo');

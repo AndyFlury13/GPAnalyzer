@@ -1,16 +1,28 @@
-/* global slideshow, highlightRectangles */
+/* global
+  slideshow,
+  highlightRectangles,
+  ON_CONTAINER,
+  IMG_CHANGE_CONTAINER,
+  PROMISES,
+  DISPLAYED_TARGETS
+  */
 
-const MONTHS = ['August', 'September', 'October', 'November', 'December', 'January', 'February', 'March', 'April', 'May', 'June'];
+const MONTHS = [
+  { name: 'August', color: '#fef001' },
+  { name: 'September', color: '#ffde00' },
+  { name: 'October', color: '#ffcc00' },
+  { name: 'November', color: '#ffba00' },
+  { name: 'December', color: '#ffa800' },
+  { name: 'January', color: '#ff9400' },
+  { name: 'February', color: '#ff8000' },
+  { name: 'March', color: '#ff6b00' },
+  { name: 'April', color: '#fb5400' },
+  { name: 'May', color: '#f63900' },
+  { name: 'June', color: '#f00505' },
+];
+
 const shortenedMonths = ['Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
 const CLIENT_NAME = 'me';
-let DISPLAYED_MONTH = '';
-let USER;
-const MONTH_IMG_CHANGE_CONTAINER = [true];
-const MONTH_ON_CONTAINER = [false];
-let MONTH_PROMISE = new Promise((resolve) => {
-  resolve(MONTH_IMG_CHANGE_CONTAINER[0]);
-});
-let SUBJECT_OR_TAKER;
 let CURRENT_SUBJECT_OR_TAKER = 'photoTaker';
 
 $('.slide-in-out-photoTaker').toggleClass('slide');
@@ -68,8 +80,9 @@ const drawBarGraph = (clientName, subjectOrTaker) => {
                 clientData.push(
                   {
                     month: shortenedMonths[monthI],
-                    photoTaker: ptD[MONTHS[monthI]],
-                    subject: sD[MONTHS[monthI]],
+                    photoTaker: ptD[MONTHS[monthI].name],
+                    subject: sD[MONTHS[monthI].name],
+                    color: MONTHS[monthI].color,
                   },
                 );
               }
@@ -83,6 +96,7 @@ const drawBarGraph = (clientName, subjectOrTaker) => {
       monthGraphXAxis.transition().duration(1000).call(d3.axisBottom(monthGraphX))
         .selectAll('text')
         .style('text-anchor', 'end')
+        .style('style', { color: 'red' })
         .attr('transform', 'rotate(-65)');
 
       // Add Y axis
@@ -92,7 +106,6 @@ const drawBarGraph = (clientName, subjectOrTaker) => {
       // variable u: map data to existing bars
       const u = monthGraphSVG.selectAll('rect')
         .data(clientData);
-      const barColor = '#69b3a2';
       // We use a list here only so we can reference an object from deeper scope
       u
         .enter()
@@ -101,26 +114,25 @@ const drawBarGraph = (clientName, subjectOrTaker) => {
         .style('cursor', 'pointer')
         .on('click', (d) => {
           const imgIDs = d[CURRENT_SUBJECT_OR_TAKER]?.split(',')?.slice(0, -1) ?? [];
-          if (d.month === DISPLAYED_MONTH) {
-            MONTH_IMG_CHANGE_CONTAINER[0] = false;
-            MONTH_ON_CONTAINER[0] = false;
-            DISPLAYED_MONTH = '';
-            $('.explanation').fadeIn();
+          if (d.month === DISPLAYED_TARGETS.month) {
+            IMG_CHANGE_CONTAINER.month = false;
+            ON_CONTAINER.month = false;
+            DISPLAYED_TARGETS.month = '';
             highlightRectangles('monthRect', d.month, d.month);
           } else {
-            if (DISPLAYED_MONTH === '') {
+            if (DISPLAYED_TARGETS.month === '') {
               highlightRectangles('monthRect', 'none', d.month);
-            } else if (DISPLAYED_MONTH !== d.month) {
-              highlightRectangles('monthRect', DISPLAYED_MONTH, d.month);
+            } else if (DISPLAYED_TARGETS.month !== d.month) {
+              highlightRectangles('monthRect', DISPLAYED_TARGETS.month, d.month);
             }
-            MONTH_IMG_CHANGE_CONTAINER[0] = true;
-            $('.explanation').fadeOut('fast');
-            MONTH_ON_CONTAINER[0] = false;
-            DISPLAYED_MONTH = d.month;
-            MONTH_PROMISE.then(() => {
-              MONTH_ON_CONTAINER[0] = true;
-              if (MONTH_IMG_CHANGE_CONTAINER[0]) {
-                MONTH_PROMISE = slideshow('month', imgIDs, MONTH_ON_CONTAINER);
+            IMG_CHANGE_CONTAINER.month = true;
+            $('.explanation-month').fadeOut('fast');
+            ON_CONTAINER.month = false;
+            DISPLAYED_TARGETS.month = d.month;
+            PROMISES.month.then(() => {
+              ON_CONTAINER.month = true;
+              if (IMG_CHANGE_CONTAINER.month) {
+                PROMISES.month = slideshow('month', imgIDs, ON_CONTAINER, IMG_CHANGE_CONTAINER);
               }
             });
           }
@@ -132,7 +144,7 @@ const drawBarGraph = (clientName, subjectOrTaker) => {
         .attr('y', (d) => monthGraphY(d[subjectOrTaker].split(',').length - 1))
         .attr('width', monthGraphX.bandwidth())
         .attr('height', (d) => monthGraphHeight - monthGraphY(d[subjectOrTaker].split(',').length - 1))
-        .attr('fill', barColor);
+        .attr('fill', (d) => d.color);
     });
   });
 };

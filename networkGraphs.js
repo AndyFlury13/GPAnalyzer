@@ -1,11 +1,16 @@
-/* global loadAndDisplayPictures */
+/* global
+  slideshow,
+  IMG_CHANGE_CONTAINER,
+  PROMISES,
+  ON_CONTAINER,
+  DISPLAYED_TARGETS
 
+*/
 const networkMargin = {
   top: 0, right: 0, bottom: 0, left: 0,
 };
 const networkWidth = 550;
 const networkHeight = 550;
-
 const totalNetworkHeight = 800;
 
 const NAMES = ['me', 'girlBoss', 'shirleyWhirley', 'dumbestKid', 'yuppie', 'bugBoy', 'emily', 'other', 'jiusus', 'chimu'];
@@ -26,7 +31,7 @@ const clientTakerSubjectSVG = d3.select('#clientTakerSubjectGraph')
   .append('g')
   .attr('transform', `translate(${networkMargin.left},${networkMargin.top})`);
 
-const totalPicturedWithSVG = d3.select('#totalGraph')
+const totalPicturedWithSVG = d3.select('#totalPWGraph')
   .append('svg')
   .classed('centeredSVG', true)
   .attr('height', totalNetworkHeight)
@@ -72,7 +77,7 @@ const processData = (clientName, data) => {
 
   const mostPicIDs = Math.max(...data.map(
     (pwRow) => {
-      if (pwRow.client === clientName || clientName === 'total') {
+      if (pwRow.client === clientName || clientName === 'totalPW') {
         return Math.max(
           ...Object.entries(pwRow).map(([targetName, targetData]) => {
             if (targetName !== 'client') {
@@ -86,7 +91,7 @@ const processData = (clientName, data) => {
     },
   ));
   data.forEach((pwRow) => {
-    if (clientName === pwRow.client || clientName === 'total') {
+    if (clientName === pwRow.client || clientName === 'totalPW') {
       Object.entries(pwRow).forEach(([targetName, targetData]) => {
         processTarget(targetName, targetData, pwRow.client, networkData);
       });
@@ -95,94 +100,143 @@ const processData = (clientName, data) => {
   return { data: networkData, mostPicIDs };
 };
 
-const highlightLink = (sourceName, targetName, on, totalGraph) => {
+const highlightLink = (oldLink, newLink, on, totalGraph, pictureDivName) => {
+  const { oldSourceName, oldTargetName } = oldLink;
+  const { newSourceName, newTargetName } = newLink;
+  console.log(oldTargetName, oldSourceName);
   if (on) {
     if (totalGraph) {
-      d3.selectAll('.link')
-        .filter((d) => !((d.sourceName === sourceName && d.targetName === targetName)
-        || (d.sourceName === targetName && d.targetName === sourceName)))
+      d3.selectAll(`.link-${pictureDivName}`)
         .transition()
         .duration(400)
-        .style('opacity', 0.2);
+        .style('opacity', 0.1);
+
+      d3.selectAll(`.link-${pictureDivName}`)
+        .filter((d) => d.sourceName === newSourceName && d.targetName === newTargetName)
+        .transition()
+        .duration(400)
+        .style('opacity', 1);
     } else {
-      d3.selectAll('.link')
-        .filter((d) => !((d.sourceName === sourceName && d.targetName === targetName)
-        || (d.sourceName === targetName && d.targetName === sourceName)))
+      d3.selectAll(`.link-${pictureDivName}`)
+        .filter((d) => (oldTargetName === ''
+          ? true
+          : d.sourceName === oldSourceName && d.targetName === oldTargetName))
         .transition()
         .duration(400)
         .style('filter', 'brightness(60%)');
+
+      d3.selectAll(`.link-${pictureDivName}`)
+        .filter((d) => d.sourceName === newSourceName && d.targetName === newTargetName)
+        .transition()
+        .duration(400)
+        .style('filter', 'brightness(100%)');
     }
-    d3.selectAll('.node')
-      .filter((d) => !(d.name === sourceName || d.name === targetName))
+
+    d3.selectAll(`.node-${pictureDivName}`)
+      .filter((d) => (oldTargetName === ''
+        ? true
+        : (d.name === oldTargetName)))
       .transition()
       .duration(400)
       .style('filter', 'brightness(60%)');
+
+    d3.selectAll(`.node-${pictureDivName}`)
+      .filter((d) => (d.name === newSourceName || d.name === newTargetName))
+      .transition()
+      .duration(400)
+      .style('filter', 'brightness(100%)');
   } else {
     if (totalGraph) {
-      d3.selectAll('.link')
+      d3.selectAll(`.link-${pictureDivName}`)
         .transition()
         .duration(400)
         .style('opacity', 1);
     } else {
-      d3.selectAll('.link')
+      d3.selectAll(`.link-${pictureDivName}`)
         .transition()
         .duration(400)
         .style('filter', 'brightness(100%)');
     }
 
-    d3.selectAll('.node')
+    d3.selectAll(`.node-${pictureDivName}`)
       .transition()
       .duration(400)
       .style('filter', 'brightness(100%)');
   }
 };
 
-const highlightNode = (nodeName, clientName, on, totalGraph) => {
+const highlightNode = (oldNodeName, newNodeName, clientName, on, totalGraph, pictureDivName) => {
   if (on) {
     if (totalGraph) {
-      d3.selectAll('.link')
-        .filter((d) => !(d.sourceName === nodeName || d.targetName === nodeName))
+      d3.selectAll(`.link-${pictureDivName}`)
+        .filter((d) => (oldNodeName === ''
+          ? true
+          : (d.sourceName === oldNodeName || d.targetName === oldNodeName)
+        ))
         .transition()
         .duration(400)
-        .style('opacity', 0.2);
-    } else {
-      d3.selectAll('.node')
-        .filter((d) => !(d.name === nodeName || d.name === clientName))
-        .transition()
-        .duration(400)
-        .style('filter', 'brightness(60%)');
-      d3.selectAll('.link')
-        .filter((d) => !((d.sourceName === nodeName && d.targetName === clientName)
-        || (d.sourceName === clientName && d.targetName === nodeName)))
-        .transition()
-        .duration(400)
-        .style('filter', 'brightness(60%)');
-    }
-  } else {
-    if (totalGraph) {
-      d3.selectAll('.link')
+        .style('opacity', 0.1);
+
+      d3.selectAll(`.link-${pictureDivName}`)
+        .filter((d) => (d.sourceName === newNodeName || d.targetName === newNodeName))
         .transition()
         .duration(400)
         .style('opacity', 1);
     } else {
-      d3.selectAll('.link')
+      d3.selectAll(`.link-${pictureDivName}`)
+        .filter((d) => (oldNodeName === ''
+          ? true
+          : (d.sourceName === oldNodeName && d.targetName === clientName)
+              || (d.sourceName === clientName && d.targetName === oldNodeName)
+        ))
+        .transition()
+        .duration(400)
+        .style('filter', 'brightness(60%)');
+
+      d3.selectAll(`.link-${pictureDivName}`)
+        .filter((d) => d.sourceName === clientName && d.targetName === newNodeName)
+        .transition()
+        .duration(400)
+        .style('filter', 'brightness(100%)');
+
+      d3.selectAll(`.node-${pictureDivName}`)
+        .filter((d) => (oldNodeName === ''
+          ? true
+          : (d.name === oldNodeName)))
+        .transition()
+        .duration(400)
+        .style('filter', 'brightness(60%)');
+
+      d3.selectAll(`.node-${pictureDivName}`)
+        .filter((d) => (d.name === newNodeName || d.name === clientName))
         .transition()
         .duration(400)
         .style('filter', 'brightness(100%)');
     }
-    d3.selectAll('.node')
+  } else {
+    if (totalGraph) {
+      d3.selectAll(`.link-${pictureDivName}`)
+        .transition()
+        .duration(400)
+        .style('opacity', 1);
+    } else {
+      d3.selectAll(`.link-${pictureDivName}`)
+        .transition()
+        .duration(400)
+        .style('filter', 'brightness(100%)');
+    }
+    d3.selectAll(`.node-${pictureDivName}`)
       .transition()
       .duration(400)
       .style('filter', 'brightness(100%)');
   }
 };
 
-const drawNetwork = (clientName, dataFileName, svg, pictureIDName, pictureDivName) => {
+const drawNetwork = (clientName, dataFileName, svg, pictureDivName) => {
   d3.csv(`/scripts/data/${dataFileName}.csv`, (data) => {
     const dataAndMostPicIds = processData(clientName, data);
     const { mostPicIDs } = dataAndMostPicIds;
     const networkData = dataAndMostPicIds.data;
-    // console.log(networkData);
     const maxLinkWidth = 10;
     // Initialize the links
     const networkDataLink = svg
@@ -190,26 +244,72 @@ const drawNetwork = (clientName, dataFileName, svg, pictureIDName, pictureDivNam
       .data(networkData.links)
       .enter()
       .append('line')
-      .classed((d) => `${d.sourceName}Link ${d.targetName}Link`, true)
-      .classed('link', true)
+      // .classed((d) => `${d.sourceName}Link ${d.targetName}Link`, true)
+      .classed(`link-${pictureDivName}`, true)
       .style('stroke', '#aaa')
+      .style('cursor', 'pointer')
       .style('stroke-width', (d) => {
         const numPicIDs = d.picIDs?.split(',')?.slice(0, -1)?.length ?? 1;
         const width = Math.ceil((maxLinkWidth * (numPicIDs + 1)) / mostPicIDs);
         return width;
       })
-      .on('mouseover', (d) => {
-        if (clientName !== 'total') {
-          const imgIDs = d.picIDs?.split(',')?.slice(0, -1) ?? [];
-          loadAndDisplayPictures(imgIDs, pictureIDName, pictureDivName);
-          highlightLink(d.sourceName, d.targetName, true, false);
+      .on('click', (d) => {
+        const imgIDs = d.picIDs?.split(',')?.slice(0, -1) ?? [];
+        if (clientName !== 'totalPW' && clientName !== 'totalTS') {
+          if (d.targetName === DISPLAYED_TARGETS[pictureDivName]) {
+            IMG_CHANGE_CONTAINER[pictureDivName] = false;
+            ON_CONTAINER[pictureDivName] = false;
+            DISPLAYED_TARGETS[pictureDivName] = '';
+            highlightLink(
+              { oldSourceName: clientName, oldTargetName: DISPLAYED_TARGETS[pictureDivName] },
+              { newSourceName: clientName, newTargetName: d.targetName },
+              false,
+              false,
+              pictureDivName,
+            );
+          } else {
+            highlightLink(
+              { oldSourceName: clientName, oldTargetName: DISPLAYED_TARGETS[pictureDivName] },
+              { newSourceName: clientName, newTargetName: d.targetName },
+              true,
+              false,
+              pictureDivName,
+            );
+            IMG_CHANGE_CONTAINER[pictureDivName] = true;
+            $(`.explanation-${pictureDivName}`).fadeOut('fast');
+            ON_CONTAINER[pictureDivName] = false;
+            DISPLAYED_TARGETS[pictureDivName] = d.targetName;
+            PROMISES[pictureDivName].then(() => {
+              ON_CONTAINER[pictureDivName] = true;
+              if (IMG_CHANGE_CONTAINER[pictureDivName]) {
+                PROMISES[pictureDivName] = slideshow(
+                  pictureDivName,
+                  imgIDs,
+                  ON_CONTAINER,
+                  IMG_CHANGE_CONTAINER,
+                );
+              }
+            });
+          }
+        } else if (d.targetName === DISPLAYED_TARGETS[pictureDivName]) {
+          highlightLink(
+            { oldSourceName: clientName, oldTargetName: DISPLAYED_TARGETS[pictureDivName] },
+            { newSourceName: clientName, newTargetName: d.targetName },
+            false,
+            true,
+            pictureDivName,
+          );
+          DISPLAYED_TARGETS[pictureDivName] = '';
         } else {
-          highlightLink(d.sourceName, d.targetName, true, true);
+          highlightLink(
+            { oldSourceName: '', oldTargetName: '' },
+            { newSourceName: d.sourceName, newTargetName: d.targetName },
+            true,
+            true,
+            pictureDivName,
+          );
+          DISPLAYED_TARGETS[pictureDivName] = d.targetName;
         }
-      })
-      .on('mouseout', () => {
-        TRANSITION_OFF = true;
-        highlightLink(null, null, false, clientName === 'total');
       });
     const config = {
       avatar_size: 130, // define the size of the circle radius
@@ -240,23 +340,71 @@ const drawNetwork = (clientName, dataFileName, svg, pictureIDName, pictureDivNam
       .data(networkData.nodes)
       .enter()
       .append('circle')
-      .classed((d) => `${d.name}Circle`, true)
-      .classed('node', true)
+      .classed(`node-${pictureDivName}`, true)
       .attr('r', (0.9 * config.avatar_size) / 2)
       .style('fill', (d) => `url(#${d.name}_icon)`)
-      .on('mouseover', (d) => {
-        if (clientName !== 'total') {
-          const imgIDs = d.picIDs?.split(',')?.slice(0, -1) ?? [];
-
-          highlightNode(d.name, clientName, true, false);
-          $('.explanation').fadeOut();
+      .style('cursor', 'pointer')
+      .on('click', (d) => {
+        const imgIDs = d.picIDs?.split(',')?.slice(0, -1) ?? [];
+        if (clientName !== 'totalPW' && clientName !== 'totalTS') {
+          if (d.name === DISPLAYED_TARGETS[pictureDivName]) {
+            IMG_CHANGE_CONTAINER[pictureDivName] = false;
+            ON_CONTAINER[pictureDivName] = false;
+            DISPLAYED_TARGETS[pictureDivName] = '';
+            highlightNode(
+              '',
+              d.name,
+              clientName,
+              false,
+              false,
+              pictureDivName,
+            );
+          } else {
+            highlightNode(
+              DISPLAYED_TARGETS[pictureDivName],
+              d.name,
+              clientName,
+              true,
+              false,
+              pictureDivName,
+            );
+            IMG_CHANGE_CONTAINER[pictureDivName] = true;
+            $(`.explanation-${pictureDivName}`).fadeOut('fast');
+            ON_CONTAINER[pictureDivName] = false;
+            DISPLAYED_TARGETS[pictureDivName] = d.name;
+            PROMISES[pictureDivName].then(() => {
+              ON_CONTAINER[pictureDivName] = true;
+              if (IMG_CHANGE_CONTAINER[pictureDivName]) {
+                PROMISES[pictureDivName] = slideshow(
+                  pictureDivName,
+                  imgIDs,
+                  ON_CONTAINER,
+                  IMG_CHANGE_CONTAINER,
+                );
+              }
+            });
+          }
+        } else if (d.name === DISPLAYED_TARGETS[pictureDivName]) {
+          highlightNode(
+            DISPLAYED_TARGETS[pictureDivName],
+            'null',
+            clientName,
+            false,
+            true,
+            pictureDivName,
+          ); clientName;
+          DISPLAYED_TARGETS[pictureDivName] = '';
         } else {
-          highlightNode(d.name, clientName, true, true);
+          highlightNode(
+            DISPLAYED_TARGETS[pictureDivName],
+            d.name,
+            clientName,
+            true,
+            true,
+            clientName,
+          );
+          DISPLAYED_TARGETS[pictureDivName] = d.name;
         }
-      })
-      .on('mouseout', () => {
-        TRANSITION_OFF = true;
-        highlightNode(null, null, false, clientName === 'total');
       });
 
     // This function is run at each iteration of the force algorithm, updating the nodes position.
@@ -284,7 +432,7 @@ const drawNetwork = (clientName, dataFileName, svg, pictureIDName, pictureDivNam
     };
 
     // Let's list the force we wanna apply on the network
-    if (clientName === 'total') {
+    if (clientName === 'totalPW') {
       d3.forceSimulation(networkData.nodes)
         .force('charge', d3.forceCollide().radius(50))
         .force('r', d3.forceRadial(() => 200))
@@ -294,6 +442,8 @@ const drawNetwork = (clientName, dataFileName, svg, pictureIDName, pictureDivNam
           .strength(() => 0))
         .on('tick', totalTicked)
         .alphaTarget(0.1);
+    } else if (clientName === 'totalTS') {
+      console.log('hello');
     } else {
       d3.forceSimulation(networkData.nodes)
         .force('link', d3.forceLink() // This force provides links between nodes

@@ -1,17 +1,12 @@
 /* global
   slideshow,
   CLIENT_NAME,
-  deleteLedgerItem,
-  LEDGER,
-  imgListener,
-  TRANSITION_OFF
+  ON_CONTAINER,
+  IMG_CHANGE_CONTAINER,
+  DISPLAYED_TARGETS,
+  PROMISES
 */
-const TREE_MAP_ON_CONTAINER = [false];
-const TREE_MAP_IMG_CHANGE_CONTAINER = [true];
-let TREE_MAP_PROMISE = new Promise((resolve) => {
-  resolve(TREE_MAP_IMG_CHANGE_CONTAINER[0]);
-});
-let DISPLAYED_CATEGORY = '';
+
 const treeMapWidth = 750;
 const treeMapHeight = 580;
 const CATEGORIES = [
@@ -66,11 +61,10 @@ const drawTooltip = (div, text, x, y) => {
 };
 
 const highlightRectangles = (className, oldCategory, newCategory) => {
-  console.log(newCategory, oldCategory);
   if (oldCategory === 'none') {
     d3.selectAll(`.${className}`)
       .filter((d) => {
-        if (className === 'treeMap') {
+        if (className === 'treeMapRect') {
           return newCategory !== d.data.name;
         }
         return newCategory !== d.month;
@@ -86,7 +80,7 @@ const highlightRectangles = (className, oldCategory, newCategory) => {
   } else {
     d3.selectAll(`.${className}`)
       .filter((d) => {
-        if (className === 'treeMap') {
+        if (className === 'treeMapRect') {
           return newCategory === d.data.name;
         }
         return newCategory === d.month;
@@ -96,7 +90,7 @@ const highlightRectangles = (className, oldCategory, newCategory) => {
       .style('filter', 'grayscale(0%)');
     d3.selectAll(`.${className}`)
       .filter((d) => {
-        if (className === 'treeMap') {
+        if (className === 'treeMapRect') {
           return newCategory !== d.data.name;
         }
         return newCategory !== d.month;
@@ -139,7 +133,6 @@ const clearTooltip = (div) => {
 
 const processCategoryData = (categoryName, categoryData, clientData) => {
   if (categoryName !== 'client') {
-    // console.log(categoryName);
     const numIDs = categoryData?.split(',')?.slice(0, -1)?.length ?? 0;
     if (numIDs !== 0) {
       clientData.children.push({
@@ -169,7 +162,6 @@ const drawTreeMap = (clientName) => {
     const clientData = {
       children: [],
     };
-    // console.log(data);
     data.forEach((row) => {
       if (row.client === clientName) {
         Object.entries(row).forEach(([categoryName, categoryData]) => {
@@ -221,26 +213,26 @@ const drawTreeMap = (clientName) => {
       })
       .on('click', (d) => {
         const imgIDs = d.data.picIDs?.split(',')?.slice(0, -1) ?? [];
-        if (d.data.name === DISPLAYED_CATEGORY) {
-          TREE_MAP_IMG_CHANGE_CONTAINER[0] = false;
-          TREE_MAP_ON_CONTAINER[0] = false;
-          DISPLAYED_CATEGORY = '';
-          $('.explanation').fadeIn();
-          highlightRectangles('treeMap', d.data.name, d.data.name);
+        if (d.data.name === DISPLAYED_TARGETS.treeMap) {
+          IMG_CHANGE_CONTAINER.treeMap = false;
+          ON_CONTAINER.treeMap = false;
+          DISPLAYED_TARGETS.treeMap = '';
+          highlightRectangles('treeMapRect', d.data.name, d.data.name);
         } else {
-          if (DISPLAYED_CATEGORY === '') {
-            highlightRectangles('treeMap', 'none', d.data.name);
-          } else if (DISPLAYED_CATEGORY !== d.data.name) {
-            highlightRectangles('treeMap', DISPLAYED_CATEGORY, d.data.name);
+          if (DISPLAYED_TARGETS.treeMap === '') {
+            console.log(d.data.name);
+            highlightRectangles('treeMapRect', 'none', d.data.name);
+          } else if (DISPLAYED_TARGETS.treeMap !== d.data.name) {
+            highlightRectangles('treeMapRect', DISPLAYED_TARGETS.treeMap, d.data.name);
           }
-          TREE_MAP_IMG_CHANGE_CONTAINER[0] = true;
-          $('.explanation').fadeOut('fast');
-          TREE_MAP_ON_CONTAINER[0] = false;
-          DISPLAYED_CATEGORY = d.data.name;
-          TREE_MAP_PROMISE.then(() => {
-            TREE_MAP_ON_CONTAINER[0] = true;
-            if (TREE_MAP_IMG_CHANGE_CONTAINER[0]) {
-              TREE_MAP_PROMISE = slideshow('treeMap', imgIDs, TREE_MAP_ON_CONTAINER);
+          IMG_CHANGE_CONTAINER.treeMap = true;
+          $('.explanation-treeMap').fadeOut('fast');
+          ON_CONTAINER.treeMap = false;
+          DISPLAYED_TARGETS.treeMap = d.data.name;
+          PROMISES.treeMap.then(() => {
+            ON_CONTAINER.treeMap = true;
+            if (IMG_CHANGE_CONTAINER.treeMap) {
+              PROMISES.treeMap = slideshow('treeMap', imgIDs, ON_CONTAINER, IMG_CHANGE_CONTAINER);
             }
           });
         }

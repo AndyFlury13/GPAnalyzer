@@ -395,8 +395,37 @@ input.question:invalid ~ input[type="submit"], textarea.question:invalid ~ input
     grid-column-end: 3;
 }
 
+.monthSection {
+    background-color: #333;
+    color: white
+}
+
 .monthGraphYAxis {
     font: 20px trebuchet;
+}
+
+.monthGraphYAxis path {
+    stroke: white;
+}
+
+.monthGraphYAxis line {
+    stroke: white;
+}
+
+.monthGraphYAxis text {
+    fill: white;
+}
+
+.monthGraphXAxis path {
+    stroke: white;
+}
+
+.monthGraphXAxis line {
+    stroke: white;
+}
+
+.monthGraphXAxis text {
+    fill: white;
 }
 
 .monthGraphXAxis {
@@ -425,7 +454,7 @@ input.question:invalid ~ input[type="submit"], textarea.question:invalid ~ input
     transition: width .5s ease, background-color .5s ease;
     -webkit-transition: width .5s ease, background-color .5s ease;
     -moz-transition: width .5s ease, background-color .5s ease;
-    
+    color:white;
     margin:auto; /* center the content so it will slide from the midddle to the left and right */
 }
 
@@ -449,13 +478,13 @@ input.question:invalid ~ input[type="submit"], textarea.question:invalid ~ input
 /* Change the width and background on hover, aka sliding from the middle to the left and right */
 .slide-in-out-photoTaker.slide {
     width: 100%;
-    background: black;
+    background: white;
 }
 
 /* Change the width and background on hover, aka sliding from the middle to the left and right */
 .slide-in-out-subject.slide {
     width: 100%;
-    background: black;
+    background: white;
 }
 
 #treeMap {
@@ -569,7 +598,12 @@ input.question:invalid ~ input[type="submit"], textarea.question:invalid ~ input
     position: absolute;
 }
 
-#totalGraph {
+#totalPWGraph {
+    height:100%;
+    width:100%;
+}
+
+#totalSTGraph {
     height:100%;
     width:100%;
 }

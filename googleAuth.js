@@ -3,7 +3,8 @@
     ICON_DATA,
     clientPicturedWithSVG,
     clientTakerSubjectSVG,
-    totalPicturedWithSVG,
+    totalPWSVG,
+    totalTSSVG,
     CREDENTIALS,
     CLIENT_NAME
 */
@@ -45,7 +46,8 @@ const loadIconPhotos = async () => {
             });
             drawNetwork(CLIENT_NAME, 'picturedWith', clientPicturedWithSVG, 'clientPicturedWith');
             drawNetwork(CLIENT_NAME, 'takerSubject', clientTakerSubjectSVG, 'clientTakerSubject');
-            drawNetwork('totalPW', 'picturedWith', totalPicturedWithSVG, 'totalPW');
+            drawNetwork('totalPW', 'picturedWith', totalPWSVG, 'totalPW');
+            drawNetwork('totalTS', 'takerSubject', totalTSSVG, 'totalTS');
             // TODO
             while ('nextPageToken' in mediaResponse) {
               console.log('todo');

@@ -444,6 +444,7 @@ input.question:invalid ~ input[type="submit"], textarea.question:invalid ~ input
     display: flex;
     align-items: center;
     justify-content: center;
+    text-align: center;
 }
 
 .slide-in-out-photoTaker {
@@ -600,12 +601,29 @@ input.question:invalid ~ input[type="submit"], textarea.question:invalid ~ input
 
 #totalPWGraph {
     height:100%;
-    width:100%;
+    width:70%;
+    float:left;
 }
 
-#totalSTGraph {
+.networkStats {
+    height: 100%;
+    width:30%;
+    display: grid;
+}
+
+.networkStats.TS {
+    float:left;
+}
+
+.networkStats.PW {
+    float: right;
+}
+
+
+#totalTSGraph {
     height:100%;
-    width:100%;
+    width:70%;
+    float: right;
 }
 
 .userNumBar {

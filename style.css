@@ -448,6 +448,14 @@ input.question:invalid ~ input[type="submit"], textarea.question:invalid ~ input
     padding: 100px;
 }
 
+.explanation-totalTS {
+    padding: 20px;
+}
+
+.explanation-totalPW {
+    padding: 20px;
+}
+
 .slide-in-out-photoTaker {
     display: block;
     height: 3px;

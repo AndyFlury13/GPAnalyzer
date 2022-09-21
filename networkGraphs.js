@@ -98,7 +98,6 @@ const processTSData = (takerSubjectData) => new Promise((resolve) => {
       const clientName = tsRow.client;
       Object.entries(tsRow).forEach(([targetName, targetData]) => {
         if (targetName !== 'client' && targetName !== clientName) {
-          // console.log(subjectTakerData[rowIndex][targetName]);
           networkData.links.push({
             source: getIDFromName(clientName, networkData.nodes),
             sourceName: clientName,
@@ -113,10 +112,7 @@ const processTSData = (takerSubjectData) => new Promise((resolve) => {
       rowIndex += 1;
     });
     const t = networkData.links.map((link) => getCombinedPicNum(link));
-    console.log(t);
     const mostPicIDs = Math.max(...t);
-    console.log(mostPicIDs);
-
     resolve({ networkData, mostPicIDs });
   });
 });
@@ -159,7 +155,6 @@ const processData = (clientName, data) => new Promise((resolve) => {
 const highlightLink = (oldLink, newLink, on, totalGraph, pictureDivName) => {
   const { oldSourceName, oldTargetName } = oldLink;
   const { newSourceName, newTargetName } = newLink;
-  console.log(oldTargetName, oldSourceName);
   if (on) {
     if (totalGraph) {
       d3.selectAll(`.link-${pictureDivName}`)
@@ -289,27 +284,26 @@ const highlightNode = (oldNodeName, newNodeName, clientName, on, totalGraph, pic
 };
 
 const displayPWStats = (imgIds) => {
-  $('explanation-totalPW')
-    .transition()
-    .duration(400)
-    .html(`${imgIds.length} times pictured together`);
+  $('.explanation-totalPW').animate({ opacity: 0 }, 200, () => {
+    $('.explanation-totalPW').html(`Pictured together ${imgIds.length} times`).animate({ opacity: 1 }, 200);
+  });
 };
 
 const displayTSStats = (d) => {
-  const sourceOfTargetLength = d.takerSubjectData?.split(',')?.slice(0, -1)?.length ?? 1;
-  const targetOfSourceLength = d.subjectTakerData?.split(',')?.slice(0, -1)?.length ?? 1;
-  $('explanation-totalTS')
-    .transition()
-    .duration(400)
-    .html(`${d.sourceName}'s taken ${sourceOfTargetLength} pictures of ${d.targetName}
-      <br/> ${d.targetName}'s taken ${targetOfSourceLength} pictures of ${d.sourceName}`);
+  console.log(d.takerSubjectData?.split(','));
+  const sourceOfTargetLength = d.takerSubjectPicIDs?.split(',')?.slice(0, -1)?.length ?? 1;
+  const targetOfSourceLength = d.subjectTakerPicIDs?.split(',')?.slice(0, -1)?.length ?? 1;
+  $('.explanation-totalTS').animate({ opacity: 0 }, 200, () => {
+    $('.explanation-totalTS').html(`${d.sourceName}'s taken ${sourceOfTargetLength} pictures of ${d.targetName}
+    <br/> ${d.targetName}'s taken ${targetOfSourceLength} pictures of ${d.sourceName}`).animate({ opacity: 1 }, 200);
+  });
 };
 
 const clearNetworkStats = (clientName) => {
-  $(`explanation-${clientName}`)
-    .transition()
-    .duration(400)
-    .html('Click on the graph edges to load stats<br/> (Clicking the nodes doesn\'t do anything but I think it looks pretty)');
+  $(`.explanation-${clientName}`).animate({ opacity: 0 }, 200, () => {
+    $(`.explanation-${clientName}`).html('Click on the graph edges to load stats'
+      + '<br/> (Clicking the nodes doesn\'t do anything but I think it looks pretty)').animate({ opacity: 1 }, 200);
+  });
 };
 
 const drawNetwork = (clientName, dataFileName, svg, pictureDivName) => {
@@ -319,7 +313,6 @@ const drawNetwork = (clientName, dataFileName, svg, pictureDivName) => {
       : processData(clientName, data);
     processPromise.then((dataAndMostPicIds) => {
       const { networkData, mostPicIDs } = dataAndMostPicIds;
-      console.log(mostPicIDs);
       const maxLinkWidth = 10;
       // Initialize the links
       const networkDataLink = svg
@@ -489,6 +482,10 @@ const drawNetwork = (clientName, dataFileName, svg, pictureDivName) => {
               });
             }
           } else if (d.name === DISPLAYED_TARGETS[pictureDivName]) {
+            if (CLICKED_ELEMENT === 'link') {
+              highlightLink('', '', true, false, pictureDivName);
+            }
+
             highlightNode(
               DISPLAYED_TARGETS[pictureDivName],
               'null',
@@ -509,6 +506,7 @@ const drawNetwork = (clientName, dataFileName, svg, pictureDivName) => {
               clientName,
             );
             DISPLAYED_TARGETS[pictureDivName] = d.name;
+            clearNetworkStats(clientName);
           }
         });
 

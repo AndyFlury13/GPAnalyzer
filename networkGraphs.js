@@ -13,6 +13,8 @@ const networkWidth = 550;
 const networkHeight = 550;
 const totalNetworkHeight = 800;
 
+let CLICKED_ELEMENT = '';
+
 const NAMES = ['me', 'girlBoss', 'shirleyWhirley', 'dumbestKid', 'yuppie', 'bugBoy', 'emily', 'other', 'jiusus', 'chimu'];
 // append the svg object to the body of the page
 const clientPicturedWithSVG = d3.select('#clientPicturedWithGraph')
@@ -325,7 +327,6 @@ const drawNetwork = (clientName, dataFileName, svg, pictureDivName) => {
         .data(networkData.links)
         .enter()
         .append('line')
-        // .classed((d) => `${d.sourceName}Link ${d.targetName}Link`, true)
         .classed(`link-${pictureDivName}`, true)
         .style('stroke', '#aaa')
         .style('cursor', 'pointer')
@@ -343,6 +344,7 @@ const drawNetwork = (clientName, dataFileName, svg, pictureDivName) => {
               IMG_CHANGE_CONTAINER[pictureDivName] = false;
               ON_CONTAINER[pictureDivName] = false;
               DISPLAYED_TARGETS[pictureDivName] = '';
+              CLICKED_ELEMENT = '';
               highlightLink(
                 { oldSourceName: clientName, oldTargetName: DISPLAYED_TARGETS[pictureDivName] },
                 { newSourceName: clientName, newTargetName: d.targetName },
@@ -351,6 +353,10 @@ const drawNetwork = (clientName, dataFileName, svg, pictureDivName) => {
                 pictureDivName,
               );
             } else {
+              if (CLICKED_ELEMENT === 'node') {
+                DISPLAYED_TARGETS[pictureDivName] = '';
+                highlightNode('', '', clientName, false, false, pictureDivName);
+              }
               highlightLink(
                 { oldSourceName: clientName, oldTargetName: DISPLAYED_TARGETS[pictureDivName] },
                 { newSourceName: clientName, newTargetName: d.targetName },
@@ -359,6 +365,7 @@ const drawNetwork = (clientName, dataFileName, svg, pictureDivName) => {
                 pictureDivName,
               );
               IMG_CHANGE_CONTAINER[pictureDivName] = true;
+              CLICKED_ELEMENT = 'link';
               $(`.explanation-${pictureDivName}`).fadeOut('fast');
               ON_CONTAINER[pictureDivName] = false;
               DISPLAYED_TARGETS[pictureDivName] = d.targetName;
@@ -383,7 +390,14 @@ const drawNetwork = (clientName, dataFileName, svg, pictureDivName) => {
               pictureDivName,
             );
             DISPLAYED_TARGETS[pictureDivName] = '';
+            clearNetworkStats(clientName);
           } else {
+            if (clientName === 'totalTS') {
+              displayTSStats(d);
+            } else {
+              displayPWStats(imgIDs);
+            }
+            DISPLAYED_TARGETS[pictureDivName] = d.targetName;
             highlightLink(
               { oldSourceName: '', oldTargetName: '' },
               { newSourceName: d.sourceName, newTargetName: d.targetName },
@@ -391,7 +405,6 @@ const drawNetwork = (clientName, dataFileName, svg, pictureDivName) => {
               true,
               pictureDivName,
             );
-            DISPLAYED_TARGETS[pictureDivName] = d.targetName;
           }
         });
       const config = {
@@ -433,9 +446,14 @@ const drawNetwork = (clientName, dataFileName, svg, pictureDivName) => {
           const imgIDs = d.picIDs?.split(',')?.slice(0, -1) ?? [];
           if (clientName !== 'totalPW' && clientName !== 'totalTS') {
             if (d.name === DISPLAYED_TARGETS[pictureDivName]) {
+              if (CLICKED_ELEMENT === 'node') {
+                DISPLAYED_TARGETS[pictureDivName] = '';
+                highlightLink('', '', clientName, false, false, pictureDivName);
+              }
               IMG_CHANGE_CONTAINER[pictureDivName] = false;
               ON_CONTAINER[pictureDivName] = false;
               DISPLAYED_TARGETS[pictureDivName] = '';
+              CLICKED_ELEMENT = '';
               highlightNode(
                 '',
                 d.name,
@@ -453,8 +471,9 @@ const drawNetwork = (clientName, dataFileName, svg, pictureDivName) => {
                 false,
                 pictureDivName,
               );
-              IMG_CHANGE_CONTAINER[pictureDivName] = true;
               $(`.explanation-${pictureDivName}`).fadeOut('fast');
+              IMG_CHANGE_CONTAINER[pictureDivName] = true;
+              CLICKED_ELEMENT = 'node';
               ON_CONTAINER[pictureDivName] = false;
               DISPLAYED_TARGETS[pictureDivName] = d.name;
               PROMISES[pictureDivName].then(() => {
@@ -490,9 +509,6 @@ const drawNetwork = (clientName, dataFileName, svg, pictureDivName) => {
               clientName,
             );
             DISPLAYED_TARGETS[pictureDivName] = d.name;
-            const t = clientName === 'totalPW'
-              ? displayPWStats(imgIDs)
-              : displayTSStats();
           }
         });
 

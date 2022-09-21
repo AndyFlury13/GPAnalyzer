@@ -445,6 +445,7 @@ input.question:invalid ~ input[type="submit"], textarea.question:invalid ~ input
     align-items: center;
     justify-content: center;
     text-align: center;
+    padding: 100px;
 }
 
 .slide-in-out-photoTaker {

@@ -390,7 +390,17 @@ const drawNetwork = (clientName, dataFileName, svg, pictureDivName) => {
               pictureDivName,
             );
             DISPLAYED_TARGETS[pictureDivName] = '';
-            clearNetworkStats(clientName);
+            if (CLICKED_ELEMENT === 'node') {
+              highlightLink(
+                { oldSourceName: '', oldTargetName: '' },
+                { newSourceName: d.sourceName, newTargetName: d.targetName },
+                true,
+                true,
+                pictureDivName,
+              );
+            } else {
+              clearNetworkStats(clientName);
+            }
           } else {
             if (clientName === 'totalTS') {
               displayTSStats(d);

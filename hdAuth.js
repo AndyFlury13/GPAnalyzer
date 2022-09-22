@@ -26,7 +26,7 @@ $('input').on('keypress', async (e) => {
     //     });
 
     $('.authenticateSection').fadeOut(1000, () => {
-      $('.scroller').fadeIn(100, () => {
+      $('.scroller').fadeIn(600, () => {
         displayStats(CLIENT_NAME);
       });
     });

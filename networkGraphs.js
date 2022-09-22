@@ -13,7 +13,15 @@ const networkWidth = 550;
 const networkHeight = 550;
 const totalNetworkHeight = 800;
 
+const edgeColors = {
+  clientTakerSubject: '#52a8ff',
+  clientPicturedWith: '#73c2fb',
+  totalPW: '#8e7eff',
+  totalTS: '#df00fe',
+};
+
 let CLICKED_ELEMENT = '';
+const CIRCLES_STROKE_WIDTH = 2;
 
 const NAMES = ['me', 'girlBoss', 'shirleyWhirley', 'dumbestKid', 'yuppie', 'bugBoy', 'emily', 'other', 'jiusus', 'chimu'];
 // append the svg object to the body of the page
@@ -290,12 +298,11 @@ const displayPWStats = (imgIds) => {
 };
 
 const displayTSStats = (d) => {
-  console.log(d.takerSubjectData?.split(','));
   const sourceOfTargetLength = d.takerSubjectPicIDs?.split(',')?.slice(0, -1)?.length ?? 1;
   const targetOfSourceLength = d.subjectTakerPicIDs?.split(',')?.slice(0, -1)?.length ?? 1;
   $('.explanation-totalTS').animate({ opacity: 0 }, 200, () => {
-    $('.explanation-totalTS').html(`${d.sourceName}'s taken ${sourceOfTargetLength} pictures of ${d.targetName}
-    <br/> ${d.targetName}'s taken ${targetOfSourceLength} pictures of ${d.sourceName}`).animate({ opacity: 1 }, 200);
+    $('.explanation-totalTS').html(`${d.sourceName} has taken ${sourceOfTargetLength} pictures of ${d.targetName}
+    <br/> ${d.targetName} has taken ${targetOfSourceLength} pictures of ${d.sourceName}`).animate({ opacity: 1 }, 200);
   });
 };
 
@@ -321,7 +328,7 @@ const drawNetwork = (clientName, dataFileName, svg, pictureDivName) => {
         .enter()
         .append('line')
         .classed(`link-${pictureDivName}`, true)
-        .style('stroke', '#aaa')
+        .style('stroke', edgeColors[pictureDivName])
         .style('cursor', 'pointer')
         .style('stroke-width', (d) => {
           const numPicIDs = clientName === 'totalTS'
@@ -434,6 +441,8 @@ const drawNetwork = (clientName, dataFileName, svg, pictureDivName) => {
           ? (0.75 * config.avatar_size) / 2
           : (0.9 * config.avatar_size) / 2))
         .style('fill', (d) => `url(#${d.name}_icon)`)
+        .style('stroke', edgeColors[pictureDivName])
+        .style('stroke-width', CIRCLES_STROKE_WIDTH)
         .style('cursor', 'pointer')
         .on('click', (d) => {
           const imgIDs = d.picIDs?.split(',')?.slice(0, -1) ?? [];
@@ -550,7 +559,7 @@ const drawNetwork = (clientName, dataFileName, svg, pictureDivName) => {
           .force('link', d3.forceLink() // This force provides links between nodes
             .id((d) => d.id) // This provide  the id of a node
             .links(networkData.links))
-          .force('charge', d3.forceManyBody().strength(-4000)) // This adds repulsion between nodes. Play with the -400 for the repulsion strength
+          .force('charge', d3.forceManyBody().strength(-4500)) // This adds repulsion between nodes. Play with the -400 for the repulsion strength
           .force('center', d3.forceCenter(networkWidth / 2, networkHeight / 2)) // This force attracts nodes to the center of the svg area
           .on('tick', networkTicked)
           .alphaTarget(0.1);

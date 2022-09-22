@@ -5,24 +5,24 @@
   IMG_CHANGE_CONTAINER,
   PROMISES,
   DISPLAYED_TARGETS
+  CLIENT_NAME
   */
 
 const MONTHS = [
-  { name: 'August', color: '#fef001' },
-  { name: 'September', color: '#ffde00' },
-  { name: 'October', color: '#ffcc00' },
-  { name: 'November', color: '#ffba00' },
-  { name: 'December', color: '#ffa800' },
-  { name: 'January', color: '#ff9400' },
-  { name: 'February', color: '#ff8000' },
-  { name: 'March', color: '#ff6b00' },
-  { name: 'April', color: '#fb5400' },
-  { name: 'May', color: '#f63900' },
-  { name: 'June', color: '#f00505' },
+  { name: 'August', color: '#ff8600' },
+  { name: 'September', color: '#ff9200' },
+  { name: 'October', color: '#ff9f00' },
+  { name: 'November', color: '#ffab00' },
+  { name: 'December', color: '#ffb700' },
+  { name: 'January', color: '#ffc300' },
+  { name: 'February', color: '#ffcf00' },
+  { name: 'March', color: '#ffdb0b' },
+  { name: 'April', color: '#ffe61c' },
+  { name: 'May', color: '#fff22a' },
+  { name: 'June', color: '#fffe37' },
 ];
 
 const shortenedMonths = ['Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
-const CLIENT_NAME = 'me';
 let CURRENT_SUBJECT_OR_TAKER = 'photoTaker';
 
 $('.slide-in-out-photoTaker').toggleClass('slide');
@@ -148,5 +148,3 @@ const drawBarGraph = (clientName, subjectOrTaker) => {
     });
   });
 };
-
-drawBarGraph(CLIENT_NAME, 'photoTaker');

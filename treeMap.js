@@ -10,23 +10,23 @@
 const treeMapWidth = 750;
 const treeMapHeight = 580;
 const CATEGORIES = [
-  { name: 'ANIMALS', color: '#6B99C3', sizeModifier: 1 },
-  { name: 'FASHION', color: '#16354D', sizeModifier: 1 },
-  { name: 'LANDMARKS', color: '#0C151C', sizeModifier: 1.7 },
-  { name: 'ARTS', color: '#033540', sizeModifier: 1 },
-  { name: 'NATURE', color: '#015366', sizeModifier: 0.9 },
-  { name: 'BIRTHDAYS', color: '#63898C', sizeModifier: 1 },
-  { name: 'FOOD', color: '#8fa4c3', sizeModifier: 0.9 },
-  { name: 'NIGHT', color: '#092435', sizeModifier: 1 },
-  { name: 'SELFIES', color: '#036280', sizeModifier: 0.7 },
-  { name: 'CITYSCAPES', color: '#378BA4', sizeModifier: 1.1 },
-  { name: 'PEOPLE', color: '#81BECE', sizeModifier: 1 },
-  { name: 'SPORT', color: '#012E4A', sizeModifier: 1 },
-  { name: 'HOLIDAYS', color: '#1F4C57', sizeModifier: 1.3 },
-  { name: 'CRAFTS', color: '#306E7B', sizeModifier: 1 },
-  { name: 'PERFORMANCES', color: '#153f65', sizeModifier: 1.3 },
-  { name: 'TRAVEL', color: '#70bdf2', sizeModifier: 1.4 },
-  { name: 'MISC', color: '#4a92a8', sizeModifier: 1 },
+  { name: 'ANIMALS', color: '#00ff42', sizeModifier: 1 },
+  { name: 'FASHION', color: '#00fd64', sizeModifier: 1 },
+  { name: 'LANDMARKS', color: '#00fb81', sizeModifier: 1.7 },
+  { name: 'ARTS', color: '#00f89c', sizeModifier: 1 },
+  { name: 'NATURE', color: '#00f5b4', sizeModifier: 0.9 },
+  { name: 'BIRTHDAYS', color: '#00f1ca', sizeModifier: 1 },
+  { name: 'FOOD', color: '#00ecde', sizeModifier: 0.9 },
+  { name: 'NIGHT', color: '#00e8ef', sizeModifier: 1 },
+  { name: 'SELFIES', color: '#00e2fe', sizeModifier: 0.7 },
+  { name: 'CITYSCAPES', color: '#00dcff', sizeModifier: 1.1 },
+  { name: 'PEOPLE', color: '#00d6ff', sizeModifier: 1 },
+  { name: 'SPORT', color: '#00cfff', sizeModifier: 1 },
+  { name: 'HOLIDAYS', color: '#00c8ff', sizeModifier: 1.3 },
+  { name: 'CRAFTS', color: '#00c0ff', sizeModifier: 1 },
+  { name: 'PERFORMANCES', color: '#00b8ff', sizeModifier: 1.3 },
+  { name: 'TRAVEL', color: '#00b0ff', sizeModifier: 1.4 },
+  { name: 'MISC', color: '#52a8ff', sizeModifier: 1 },
 ];
 // append the svg object to the body of the page
 
@@ -190,7 +190,7 @@ const drawTreeMap = (clientName) => {
       .attr('y', (d) => d.y0)
       .attr('width', (d) => d.x1 - d.x0)
       .attr('height', (d) => d.y1 - d.y0)
-      .style('stroke', '#E4E5EA')
+      .style('stroke', '#333333')
       .style('fill', (d) => getColor(d.data.name));
     selection
       .append('rect')
@@ -199,7 +199,7 @@ const drawTreeMap = (clientName) => {
       .attr('y', (d) => d.y0)
       .attr('width', (d) => d.x1 - d.x0)
       .attr('height', (d) => d.y1 - d.y0)
-      .style('stroke', '#E4E5EA')
+      .style('stroke', '#333333')
       .style('cursor', 'pointer')
       .style('fill', (d) => `url(#${d.data.name}_icon)`)
       .on('mouseenter', (d) => {
@@ -239,5 +239,3 @@ const drawTreeMap = (clientName) => {
       });
   });
 };
-
-drawTreeMap(CLIENT_NAME);

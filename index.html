@@ -53,7 +53,19 @@
                   <img width="40" height="40" alt="" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/PjwhRE9DVFlQRSBzdmcgIFBVQkxJQyAnLS8vVzNDLy9EVEQgU1ZHIDEuMS8vRU4nICAnaHR0cDovL3d3dy53My5vcmcvR3JhcGhpY3MvU1ZHLzEuMS9EVEQvc3ZnMTEuZHRkJz48c3ZnIGVuYWJsZS1iYWNrZ3JvdW5kPSJuZXcgMCAwIDMyIDMyIiBoZWlnaHQ9IjMycHgiIGlkPSLQodC70L7QuV8xIiB2ZXJzaW9uPSIxLjEiIHZpZXdCb3g9IjAgMCAzMiAzMiIgd2lkdGg9IjMycHgiIHhtbDpzcGFjZT0icHJlc2VydmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiPjxwYXRoIGQ9Ik0yNC4yODUsMTEuMjg0TDE2LDE5LjU3MWwtOC4yODUtOC4yODhjLTAuMzk1LTAuMzk1LTEuMDM0LTAuMzk1LTEuNDI5LDAgIGMtMC4zOTQsMC4zOTUtMC4zOTQsMS4wMzUsMCwxLjQzbDguOTk5LDkuMDAybDAsMGwwLDBjMC4zOTQsMC4zOTUsMS4wMzQsMC4zOTUsMS40MjgsMGw4Ljk5OS05LjAwMiAgYzAuMzk0LTAuMzk1LDAuMzk0LTEuMDM2LDAtMS40MzFDMjUuMzE5LDEwLjg4OSwyNC42NzksMTAuODg5LDI0LjI4NSwxMS4yODR6IiBmaWxsPSIjMTIxMzEzIiBpZD0iRXhwYW5kX01vcmUiLz48Zy8+PGcvPjxnLz48Zy8+PGcvPjxnLz48L3N2Zz4=" />
                 </div>
             </section>
-            
+
+            <section class="statsSection">
+                <div class="picturedWithTop3">
+                    You were most often photographed with...
+                </div>
+                <div class="asSubjectTop3">
+                    You were most photographed by...
+                </div>
+                <div class="asPhototakerTop3">
+                    You took the most photos of...
+                </div>
+            </section>
+
             <section class="monthSection">
                 <div id="monthGraphAndButtons">
                     <div class="monthGraphButtons">
@@ -66,23 +78,14 @@
                     <div class="explanation explanation-month">Click graph elements to load images</div>
                 </div>
             </section>
+
             <section class="treeMapSection">
                 <div id="treeMapPhotos" class="photoContainer">
                     <div class="explanation explanation-treeMap">Click the graph elements to load images</div>
                 </div>
                 <div id="treeMap"></div>
             </section>
-            <section class="statsSection">
-                <div class="picturedWithTop3">
-                    You were most often photographed with...
-                </div>
-                <div class="asSubjectTop3">
-                    You were most photographed by...
-                </div>
-                <div class="asPhototakerTop3">
-                    You took the most photos of...
-                </div>
-            </section>
+
             <section class="clientTakerSubjectSection">
                 <div id="clientTakerSubjectGraph"></div>
                 <div class="photoContainer" id="clientTakerSubjectPhotos">
@@ -91,8 +94,8 @@
                         Every edge from you to someone else represents pictures you've taken of them.
                     </div>
                 </div>
-                
             </section>
+
             <section class="clientPicturedWithSection">
                 <div class="photoContainer" id="clientPicturedWithPhotos">
                     <div class="explanation explanation-clientPicturedWith">
@@ -102,6 +105,7 @@
                 </div>
                 <div id="clientPicturedWithGraph"></div>
             </section>
+
             <section class="totalPWSection">
                 <div id="totalPWGraph"></div>
                 <div class="networkStats PW">
@@ -111,6 +115,7 @@
                     </div>
                 </div>
             </section>
+            
             <section class="totalTSSection">
                 <div class="networkStats TS">
                     <div class="explanation explanation-totalTS">
@@ -124,12 +129,12 @@
         <script src="/imageLoader.js" type="text/javascript"></script>
         <script src="/monthGraph.js" type="text/javascript"></script>
         <script src="/credentials.js" type="text/javascript"></script>
-        <script src="/googleAuth.js" type="text/javascript"></script>
         <script src="/hdAuth.js" type="text/javascript"></script>
         <script src="/networkGraphs.js" type="text/javascript"></script>
         <script src="/treeMap.js" type="text/javascript"></script>
         <script src="/stats.js" type="text/javascript"></script>
         <script src="/top3Stats.js" type="text/javascript"></script>
+        <script src="/googleAuth.js" type="text/javascript"></script>
 
     </body>
 </html>

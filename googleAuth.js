@@ -6,9 +6,15 @@
     totalPWSVG,
     totalTSSVG,
     CREDENTIALS,
-    CLIENT_NAME
+    drawNetwork
+    drawTop3Stats
+    columnOneColors,
+    columnTwoColors,
+    columnThreeColors
+    drawTreeMap
+    drawBarGraph
 */
-
+const CLIENT_NAME = 'me';
 $(document).ready(() => {
   $('.hdPwdInput').hide();
   $('.scroller').hide();
@@ -48,6 +54,14 @@ const loadIconPhotos = async () => {
             drawNetwork(CLIENT_NAME, 'takerSubject', clientTakerSubjectSVG, 'clientTakerSubject');
             drawNetwork('totalPW', 'picturedWith', totalPWSVG, 'totalPW');
             drawNetwork('totalTS', 'takerSubject', totalTSSVG, 'totalTS');
+
+            drawTop3Stats(CLIENT_NAME, 'picturedWith', 'picturedWithTop3', columnOneColors);
+            drawTop3Stats(CLIENT_NAME, 'subjectTaker', 'asSubjectTop3', columnTwoColors);
+            drawTop3Stats(CLIENT_NAME, 'takerSubject', 'asPhototakerTop3', columnThreeColors);
+
+            drawTreeMap(CLIENT_NAME);
+            drawBarGraph(CLIENT_NAME, 'photoTaker');
+
             // TODO
             while ('nextPageToken' in mediaResponse) {
               console.log('todo');

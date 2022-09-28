@@ -1,6 +1,5 @@
 /* global
   slideshow,
-  CLIENT_NAME,
   ON_CONTAINER,
   IMG_CHANGE_CONTAINER,
   DISPLAYED_TARGETS,

@@ -20,7 +20,12 @@ const edgeColors = {
   totalTS: '#df00fe',
 };
 
-let CLICKED_ELEMENT = '';
+const CLICKED_ELEMENT = {
+  clientTakerSubject: '',
+  clientPicturedWith: '',
+  totalTS: '',
+  totalPW: '',
+};
 const CIRCLES_STROKE_WIDTH = 2;
 
 const NAMES = ['me', 'girlBoss', 'shirleyWhirley', 'dumbestKid', 'yuppie', 'bugBoy', 'emily', 'other', 'jiusus', 'chimu'];
@@ -344,7 +349,7 @@ const drawNetwork = (clientName, dataFileName, svg, pictureDivName) => {
               IMG_CHANGE_CONTAINER[pictureDivName] = false;
               ON_CONTAINER[pictureDivName] = false;
               DISPLAYED_TARGETS[pictureDivName] = '';
-              CLICKED_ELEMENT = '';
+              CLICKED_ELEMENT[pictureDivName] = '';
               highlightLink(
                 { oldSourceName: clientName, oldTargetName: DISPLAYED_TARGETS[pictureDivName] },
                 { newSourceName: clientName, newTargetName: d.targetName },
@@ -353,7 +358,7 @@ const drawNetwork = (clientName, dataFileName, svg, pictureDivName) => {
                 pictureDivName,
               );
             } else {
-              if (CLICKED_ELEMENT === 'node') {
+              if (CLICKED_ELEMENT[pictureDivName] === 'node') {
                 DISPLAYED_TARGETS[pictureDivName] = '';
                 highlightNode('', '', clientName, false, false, pictureDivName);
               }
@@ -365,7 +370,7 @@ const drawNetwork = (clientName, dataFileName, svg, pictureDivName) => {
                 pictureDivName,
               );
               IMG_CHANGE_CONTAINER[pictureDivName] = true;
-              CLICKED_ELEMENT = 'link';
+              CLICKED_ELEMENT[pictureDivName] = 'link';
               $(`.explanation-${pictureDivName}`).fadeOut('fast');
               ON_CONTAINER[pictureDivName] = false;
               DISPLAYED_TARGETS[pictureDivName] = d.targetName;
@@ -381,7 +386,8 @@ const drawNetwork = (clientName, dataFileName, svg, pictureDivName) => {
                 }
               });
             }
-          } else if (d.targetName === DISPLAYED_TARGETS[pictureDivName]) {
+          } else if (d.targetName === DISPLAYED_TARGETS[pictureDivName]
+            || d.sourceName === DISPLAYED_TARGETS[pictureDivName]) {
             highlightLink(
               { oldSourceName: clientName, oldTargetName: DISPLAYED_TARGETS[pictureDivName] },
               { newSourceName: clientName, newTargetName: d.targetName },
@@ -389,8 +395,9 @@ const drawNetwork = (clientName, dataFileName, svg, pictureDivName) => {
               true,
               pictureDivName,
             );
-            DISPLAYED_TARGETS[pictureDivName] = '';
-            if (CLICKED_ELEMENT === 'node') {
+
+            console.log(CLICKED_ELEMENT[pictureDivName]);
+            if (CLICKED_ELEMENT[pictureDivName] === 'node') {
               highlightLink(
                 { oldSourceName: '', oldTargetName: '' },
                 { newSourceName: d.sourceName, newTargetName: d.targetName },
@@ -398,8 +405,17 @@ const drawNetwork = (clientName, dataFileName, svg, pictureDivName) => {
                 true,
                 pictureDivName,
               );
+              if (clientName === 'totalTS') {
+                displayTSStats(d);
+              } else {
+                displayPWStats(imgIDs);
+              }
+              CLICKED_ELEMENT[pictureDivName] = 'link';
+              DISPLAYED_TARGETS[pictureDivName] = d.sourceName;
             } else {
               clearNetworkStats(clientName);
+              DISPLAYED_TARGETS[pictureDivName] = '';
+              CLICKED_ELEMENT[pictureDivName] = '';
             }
           } else {
             if (clientName === 'totalTS') {
@@ -408,6 +424,7 @@ const drawNetwork = (clientName, dataFileName, svg, pictureDivName) => {
               displayPWStats(imgIDs);
             }
             DISPLAYED_TARGETS[pictureDivName] = d.targetName;
+            CLICKED_ELEMENT[pictureDivName] = 'link';
             highlightLink(
               { oldSourceName: '', oldTargetName: '' },
               { newSourceName: d.sourceName, newTargetName: d.targetName },
@@ -455,17 +472,19 @@ const drawNetwork = (clientName, dataFileName, svg, pictureDivName) => {
         .style('stroke-width', CIRCLES_STROKE_WIDTH)
         .style('cursor', 'pointer')
         .on('click', (d) => {
+          console.log(CLICKED_ELEMENT[pictureDivName]);
+          console.log(DISPLAYED_TARGETS[pictureDivName]);
           const imgIDs = d.picIDs?.split(',')?.slice(0, -1) ?? [];
           if (clientName !== 'totalPW' && clientName !== 'totalTS') {
             if (d.name === DISPLAYED_TARGETS[pictureDivName]) {
-              if (CLICKED_ELEMENT === 'node') {
+              if (CLICKED_ELEMENT[pictureDivName] === 'link') {
                 DISPLAYED_TARGETS[pictureDivName] = '';
                 highlightLink('', '', clientName, false, false, pictureDivName);
               }
               IMG_CHANGE_CONTAINER[pictureDivName] = false;
               ON_CONTAINER[pictureDivName] = false;
               DISPLAYED_TARGETS[pictureDivName] = '';
-              CLICKED_ELEMENT = '';
+              CLICKED_ELEMENT[pictureDivName] = '';
               highlightNode(
                 '',
                 d.name,
@@ -485,7 +504,7 @@ const drawNetwork = (clientName, dataFileName, svg, pictureDivName) => {
               );
               $(`.explanation-${pictureDivName}`).fadeOut('fast');
               IMG_CHANGE_CONTAINER[pictureDivName] = true;
-              CLICKED_ELEMENT = 'node';
+              CLICKED_ELEMENT[pictureDivName] = 'node';
               ON_CONTAINER[pictureDivName] = false;
               DISPLAYED_TARGETS[pictureDivName] = d.name;
               PROMISES[pictureDivName].then(() => {
@@ -501,20 +520,31 @@ const drawNetwork = (clientName, dataFileName, svg, pictureDivName) => {
               });
             }
           } else if (d.name === DISPLAYED_TARGETS[pictureDivName]) {
-            if (CLICKED_ELEMENT === 'link') {
-              highlightLink('', '', true, false, pictureDivName);
-            }
-
             highlightNode(
-              DISPLAYED_TARGETS[pictureDivName],
-              'null',
+              '',
+              '',
               clientName,
               false,
               true,
               pictureDivName,
             );
-            DISPLAYED_TARGETS[pictureDivName] = '';
-            clearNetworkStats(clientName);
+
+            if (CLICKED_ELEMENT[pictureDivName] === 'link') {
+              highlightNode(
+                '',
+                d.name,
+                clientName,
+                true,
+                true,
+                pictureDivName,
+              );
+              CLICKED_ELEMENT[pictureDivName] = 'node';
+              DISPLAYED_TARGETS[pictureDivName] = d.name;
+            } else {
+              DISPLAYED_TARGETS[pictureDivName] = '';
+              clearNetworkStats(clientName);
+              CLICKED_ELEMENT[pictureDivName] = '';
+            }
           } else {
             highlightNode(
               DISPLAYED_TARGETS[pictureDivName],
@@ -526,6 +556,7 @@ const drawNetwork = (clientName, dataFileName, svg, pictureDivName) => {
             );
             DISPLAYED_TARGETS[pictureDivName] = d.name;
             clearNetworkStats(clientName);
+            CLICKED_ELEMENT[pictureDivName] = 'node';
           }
         });
 

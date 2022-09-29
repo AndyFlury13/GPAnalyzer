@@ -222,13 +222,13 @@ def createCategoryMatrix(gpRequestHeader):
     
 def getOverallStatsJSON():
     overallStats = {}
-    with open('data/overallStats.json') as f_in:
+    with open('../../scrappyBookFrontend/firebaseShell/data/overallStats.json') as f_in:
         overallStats = json.load(f_in)
     f_in.close()
     return overallStats
 
 def writeOverallStatsJSON(overallStats):
-    with open("data/overallStats.json", "w") as fp:
+    with open("../../scrappyBookFrontend/firebaseShell/data/overallStats.json", "w") as fp:
         json.dump(overallStats , fp) 
     fp.close()
 
@@ -257,8 +257,8 @@ def createOverallJSON(gpRequestHeader):
 def writeMatrix(matrix, name):
     matrix = matrix.applymap(randomizeIDs)
     if name == 'takerSubject':
-        matrix.T.to_csv("data/subjectTaker.csv")
-    matrix.to_csv("data/%s.csv" %name)
+        matrix.T.to_csv("../../scrappyBookFrontend/firebaseShell/data/subjectTaker.csv")
+    matrix.to_csv("../../scrappyBookFrontend/firebaseShell/data/%s.csv" %name)
 
 def writeStart(start, startingIndexName):
     with open('idFiles/startingIndices/%s.txt' %startingIndexName, 'w+') as f:
@@ -272,14 +272,14 @@ def writeStart(start, startingIndexName):
 def resetMatrix(rowLabels, columnLabels, indexName, fileName):
     matrix = pd.DataFrame('', index=rowLabels, columns=columnLabels)
     matrix.index.name = indexName
-    matrix.to_csv('data/%s.csv' %fileName)
+    matrix.to_csv('../../scrappyBookFrontend/firebaseShell/data/%s.csv' %fileName)
 
 def resetJSON():
     writeOverallStatsJSON(tableConstants.emptyOverallStats)
 
 def getMatrix(fileName):
     
-    matrix = pd.read_csv('data/%s.csv' %fileName, index_col=0)
+    matrix = pd.read_csv('../../scrappyBookFrontend/firebaseShell/data/%s.csv' %fileName, index_col=0)
     matrix = matrix.fillna('')
     return matrix
                              

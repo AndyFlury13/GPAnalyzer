@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link href="style.css" rel="stylesheet" type="text/css">
+        <script src="https://d3js.org/d3.v4.min.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script src="https://apis.google.com/js/api.js"></script>
+    </head>
+
+    <body>
+
+        <div class="authenticateSection">
+
+            
+            <div id="authenticateButton">First off, click here to sign-in with Google</div>
+            
+            <div class="loader">
+                <div class="loader-inner">
+                    <div class="loader-line-wrap">
+                        <div class="loader-line"></div>
+                    </div>
+                    <div class="loader-line-wrap">
+                        <div class="loader-line"></div>
+                    </div>
+                    <div class="loader-line-wrap">
+                        <div class="loader-line"></div>
+                    </div>
+                    <div class="loader-line-wrap">
+                        <div class="loader-line"></div>
+                    </div>
+                    <div class="loader-line-wrap">
+                        <div class="loader-line"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- taken from https://codepen.io/atunnecliffe/pen/gpKzQw -->
+            <div class="hdPwdInput">
+                <input type="text" name="name" class="question" id="nme" required autocomplete="off" />
+                <label for="nme"><span>What's Andrew's Facebook nickname for you?</span></label>
+            </div>
+        </div>  
+        <article class="scroller">
+            
+            <section class="overallStatsSection">
+                <p>
+                    <span class="introBlurb0 blurbs"></span>
+                    <span class="introBlurb1 blurbs"></span>
+                    <span class="introBlurb2 blurbs"></span>
+                    <span class="introBlurb3 blurbs"></span>
+                </p>
+                <div class="downArrow bounce">
+                  <img width="40" height="40" alt="" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/PjwhRE9DVFlQRSBzdmcgIFBVQkxJQyAnLS8vVzNDLy9EVEQgU1ZHIDEuMS8vRU4nICAnaHR0cDovL3d3dy53My5vcmcvR3JhcGhpY3MvU1ZHLzEuMS9EVEQvc3ZnMTEuZHRkJz48c3ZnIGVuYWJsZS1iYWNrZ3JvdW5kPSJuZXcgMCAwIDMyIDMyIiBoZWlnaHQ9IjMycHgiIGlkPSLQodC70L7QuV8xIiB2ZXJzaW9uPSIxLjEiIHZpZXdCb3g9IjAgMCAzMiAzMiIgd2lkdGg9IjMycHgiIHhtbDpzcGFjZT0icHJlc2VydmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiPjxwYXRoIGQ9Ik0yNC4yODUsMTEuMjg0TDE2LDE5LjU3MWwtOC4yODUtOC4yODhjLTAuMzk1LTAuMzk1LTEuMDM0LTAuMzk1LTEuNDI5LDAgIGMtMC4zOTQsMC4zOTUtMC4zOTQsMS4wMzUsMCwxLjQzbDguOTk5LDkuMDAybDAsMGwwLDBjMC4zOTQsMC4zOTUsMS4wMzQsMC4zOTUsMS40MjgsMGw4Ljk5OS05LjAwMiAgYzAuMzk0LTAuMzk1LDAuMzk0LTEuMDM2LDAtMS40MzFDMjUuMzE5LDEwLjg4OSwyNC42NzksMTAuODg5LDI0LjI4NSwxMS4yODR6IiBmaWxsPSIjMTIxMzEzIiBpZD0iRXhwYW5kX01vcmUiLz48Zy8+PGcvPjxnLz48Zy8+PGcvPjxnLz48L3N2Zz4=" />
+                </div>
+            </section>
+
+            <section class="statsSection">
+                <div class="picturedWithTop3">
+                    You were most often photographed with...
+                </div>
+                <div class="asSubjectTop3">
+                    You were most photographed by...
+                </div>
+                <div class="asPhototakerTop3">
+                    You took the most photos of...
+                </div>
+            </section>
+
+            <section class="monthSection">
+                <div id="monthGraphAndButtons">
+                    <div class="monthGraphButtons">
+                        <div id = 'monthGraphPhotoTakerButton' onclick="drawBarGraph(CLIENT_NAME,'photoTaker')">As the photographer<span class='slide-in-out-photoTaker'></span></div>
+                        <div id = 'monthGraphPhotoSubjectButton' onclick="drawBarGraph(CLIENT_NAME, 'subject')">As the subject<span class='slide-in-out-subject'></span></div>
+                    </div>
+                    <div id="monthGraph"></div>
+                </div>
+                <div id="monthPhotos" class="photoContainer">
+                    <div class="explanation explanation-month">Click graph elements to load images</div>
+                </div>
+            </section>
+
+            <section class="treeMapSection">
+                <div id="treeMapPhotos" class="photoContainer">
+                    <div class="explanation explanation-treeMap">Click the graph elements to load images</div>
+                </div>
+                <div id="treeMap"></div>
+            </section>
+
+            <section class="clientTakerSubjectSection">
+                <div id="clientTakerSubjectGraph"></div>
+                <div class="photoContainer" id="clientTakerSubjectPhotos">
+                    <div class="explanation explanation-clientTakerSubject">
+                        Click the graph elements to load images<br/>
+                        Every edge from you to someone else represents pictures you've taken of them.
+                    </div>
+                </div>
+            </section>
+
+            <section class="clientPicturedWithSection">
+                <div class="photoContainer" id="clientPicturedWithPhotos">
+                    <div class="explanation explanation-clientPicturedWith">
+                        Click the graph elements to load images<br/>
+                        Every edge from you to someone else represents pictures you appear in with them.
+                    </div>
+                </div>
+                <div id="clientPicturedWithGraph"></div>
+            </section>
+
+            <section class="questionSection">
+                Here are some of the questions that led me to this project:
+                <ol>
+                <li>Which pair in our friend group took the most pictures of each other?</li>
+                <li>which pair in our friend group was most photographed together?</li>
+                <li>Did Eric ever upload any pictures to this photodrive??</li>
+                </ol>
+               
+            </ol>
+            You can send me your guesses: <br/>
+                
+                <div class="firstQuestion question">
+                    1.
+                    <div class="dropdown firstDropdown">
+                        <div class="dropDownBtn dropDownBtn-pw1" clicked="false">
+                            Dwight Schrute
+                        </div>
+                        <div class="options-pw1 options">
+                        </div>
+                    </div>
+                    <div class="dropdown secondDropdown">
+                        <div class="dropDownBtn dropDownBtn-pw2" clicked="false">
+                            Dwight Schrute
+                        </div>
+                        <div class="options-pw2 options">
+                        </div>
+                    </div>
+                </div>
+                <div class="secondQuestion question">
+                    2.
+                    <div class="dropdown thirdDropdown">
+                        <div class="dropDownBtn dropDownBtn-st1" clicked="false">
+                            Dwight Schrute
+                        </div>
+                        <div class="options-st1 options">
+                        </div>
+                    </div>
+                    <div class="dropdown fourthDropdown">
+                        <div class="dropDownBtn dropDownBtn-st2" clicked="false">
+                            Dwight Schrute
+                        </div>
+                        <div class="options-st2 options">
+                        </div>
+                    </div>
+                </div>
+                <div class="thirdQuestion question">
+                    3.
+                    <div class="dropdown fifthDropdown">
+                        <div class="dropDownBtn dropDownBtn-eric" clicked="false">
+                            Y / N
+                        </div>
+                        <div class="options-eric options">
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section class="totalPWSection">
+                <div id="totalPWGraph"></div>
+                <div class="networkStats PW">
+                    <div class="explanation explanation-totalPW">
+                        Every edge between two people represents pictures they are in together<br/>
+                        Click the graph edges to load stats<br/>
+                        (Clicking the nodes doesn't do anything but I think it looks pretty)
+                    </div>
+                </div>
+            </section>
+            
+            <section class="totalTSSection">
+                <div class="networkStats TS">
+                    <div class="explanation explanation-totalTS">
+                        Every edge between two people represents pictures they've taken of each other<br/>
+                        Click on the graph edges to load stats<br/>
+                        (Clicking the nodes doesn't do anything but I think it looks pretty)
+                    </div>
+                </div>
+                <div id="totalTSGraph"></div>
+            </section>
+        </article>
+        <script src="/imageLoader.js" type="text/javascript"></script>
+        <script src="/dropDown.js" type="text/javascript"></script>
+        <script src="/monthGraph.js" type="text/javascript"></script>
+        <script src="/credentials.js" type="text/javascript"></script>
+        <script src="/hdAuth.js" type="text/javascript"></script>
+        <script src="/networkGraphs.js" type="text/javascript"></script>
+        <script src="/treeMap.js" type="text/javascript"></script>
+        <script src="/stats.js" type="text/javascript"></script>
+        <script src="/top3Stats.js" type="text/javascript"></script>
+        <script src="/googleAuth.js" type="text/javascript"></script>
+
+        <script type="module">
+            // Import the functions you need from the SDKs you need
+            import { initializeApp } from "https://www.gstatic.com/firebasejs/9.10.0/firebase-app.js";
+            import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.10.0/firebase-analytics.js";
+            // TODO: Add SDKs for Firebase products that you want to use
+            // https://firebase.google.com/docs/web/setup#available-libraries
+          
+            // Your web app's Firebase configuration
+            // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+            const firebaseConfig = {
+              apiKey: "AIzaSyDaX3x6k_XMswIgzf9qez9JOw2PXVglvoI",
+              authDomain: "scrappybookstatichost.firebaseapp.com",
+              projectId: "scrappybookstatichost",
+              storageBucket: "scrappybookstatichost.appspot.com",
+              messagingSenderId: "161453578997",
+              appId: "1:161453578997:web:c27e689b02762e239e03bc",
+              measurementId: "G-KYV48L2C6Q"
+            };
+          
+            // Initialize Firebase
+            const app = initializeApp(firebaseConfig);
+            const analytics = getAnalytics(app);
+          </script>
+    </body>
+</html>

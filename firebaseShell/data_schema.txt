@@ -1,0 +1,36 @@
+TakerSubject matrix:
+
+photoTAKER X SUBJECTS
+
++----------------+-----+----------------+--------+
+|                | me  | shirleyWhirley | bugBoy |
++----------------+-----+----------------+--------+
+| me             | ''  | '1'            | '2'    |
++----------------+-----+----------------+--------+
+| shirleyWhirley | '3' | ''            | '4'    |
++----------------+-----+----------------+--------+
+| bugBoy         | '5' | '6'            | ''    |
++----------------+-----+----------------+--------+
+
+picture '1' is an image I have taken of Shirley.
+picture '3' is an image Shirley has taken of me.
+
+
+SubjectTaker matrix:
+
+transpose of takerSubject
+SUBJECTS X photoTAKER
+
++----------------+-----+----------------+--------+
+|                | me  | shirleyWhirley | bugBoy |
++----------------+-----+----------------+--------+
+| me             | ''  | '3'            | '5'    |
++----------------+-----+----------------+--------+
+| shirleyWhirley | '1' | ''            | '6'    |
++----------------+-----+----------------+--------+
+| bugBoy         | '2' | '4'            | ''    |
++----------------+-----+----------------+--------+
+
+picture '3' is an image Shirley has taken of me.
+picture '1' is an image I have taken of Shirley.
+

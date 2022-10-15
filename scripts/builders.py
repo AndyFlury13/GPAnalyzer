@@ -6,6 +6,7 @@ import tableConstants
 import getters
 import os
 import endpoints
+import startJSONHandlers
 
 
 """
@@ -128,7 +129,8 @@ def createSubjectMatrices(gpRequestHeader, MAX_PICS=False):
     overallStats = getOverallStatsJSON()
     print('Building subject-taker and photographed with matrices...')
     idFile = open('idFiles/picIDs.txt', 'r')
-    startJSON = getStartJSON("subject")
+    startJSON = startJSONHandlers.getJSON("builders/subject")
+    start = startJSON['startingIndex']
     if MAX_PICS:
         ids = idFile.readlines()[start:MAX_PICS]
     else:
@@ -140,7 +142,7 @@ def createSubjectMatrices(gpRequestHeader, MAX_PICS=False):
         if pictureTaker == '429':
             writeMatrix(picturedWithMatrix, 'picturedWith')
             writeMatrix(takerSubjectMatrix, 'takerSubject')
-            writeStart(imgIDNum, 'subject')
+            startJSONHandlers.writeJSON({'startingIndex': imgIDNum}, 'builder/subject')
             return
         if pictureTaker == 'video':
             continue
@@ -160,7 +162,7 @@ def createSubjectMatrices(gpRequestHeader, MAX_PICS=False):
     writeMatrix(picturedWithMatrix, 'picturedWith')
     writeMatrix(takerSubjectMatrix, 'takerSubject')
     writeMatrix(subjectTakerMatrix, 'subjectTaker')
-    writeStart(0, 'subject')
+    startJSONHandlers.writeJSON({'startingIndex':0}, 'builder/subject')
     print('Matrices built!')
 
 def randomizeIDs(idString):
@@ -173,8 +175,8 @@ def createMonthMatrices(gpRequestHeader, MAX_PICS=False):
     pictureBySubjectByMonth = getMatrix('pictureBySubjectByMonth')
     pictureOfSubjectByMonth = getMatrix('pictureOfSubjectByMonth')
     print('Building monthly matrices...')
-    start = getStart('months')
-    monthStart, lineStart = [int(i) for i in start.split(",")]
+    startJSON = startJSONHandlers.getJSON("builder/month")
+    monthStart, lineStart = startJSON['startingMonthIndex'], startJSON['startingIndex']
     for monthNum, monthEntry in enumerate(tableConstants.MONTHS[monthStart:]):
         print(monthEntry['name'])
         idFile = open('idFiles/months/'+monthEntry['name']+'PicIDs.txt', 'r')
@@ -191,7 +193,11 @@ def createMonthMatrices(gpRequestHeader, MAX_PICS=False):
             elif pictureTaker == '429':
                 writeMatrix(pictureBySubjectByMonth, 'pictureBySubjectByMonth')
                 writeMatrix(pictureOfSubjectByMonth, 'pictureOfSubjectByMonth')
-                writeStart(str(monthNum)+','+str(monthIDNum), 'months')
+                startJSON = {
+                    "startingMonthIndex":monthNum,
+                    "startingIndex":monthIDNum
+                }
+                startJSONHandlers.writeJSON(startJSON, 'builder/months')
                 return
             pictureBySubjectByMonth.at[pictureTaker, monthEntry['name']]+=imgID+','
             try:
@@ -204,14 +210,19 @@ def createMonthMatrices(gpRequestHeader, MAX_PICS=False):
                 print(recognitionRes)
     writeMatrix(pictureBySubjectByMonth, 'pictureBySubjectByMonth')
     writeMatrix(pictureOfSubjectByMonth, 'pictureOfSubjectByMonth')
-    writeStart(str(0)+','+str(0), 'months')
+    startJSON = {
+        "startingMonthIndex":0,
+        "startingIndex":0
+    }
+    startJSONHandlers.writeJSON(startJSON, 'builder/month')
     print('Matrices built!')
         
 def createCategoryMatrix(gpRequestHeader, MAX_PICS=False):
     subjectCategory = getMatrix('subjectCategory')
     print('Building category matrix...')
-    start = getStart('categories')
-    categoryStart, lineStart = [int(i) for i in start.split(",")]
+    startJSON = startJSONHandlers.getJSON('builder/category')
+    categoryStart, lineStart = startJSON["startingCategoryIndex"], startJSON["startingIndex"]
+
     for categoryNum, category in enumerate(tableConstants.CATEGORIES[categoryStart:]):
         idFile = open('idFiles/categories/'+category[-1]+'PicIDs.txt', 'r')
         categoryNum += categoryStart
@@ -226,12 +237,20 @@ def createCategoryMatrix(gpRequestHeader, MAX_PICS=False):
                  continue
             elif pictureTaker == '429':
                 writeMatrix(subjectCategory, 'subjectCategory')
-                writeStart(str(categoryNum)+','+str(imgIDNum), 'categories')
+                startJSON = {
+                    "startingCategoryIndex": categoryNum,
+                    "startingIndex":imgIDNum
+                }
+                startJSONHandlers.writeJSON(startJSON, 'builder/category')
                 return
             subjectCategory.at[pictureTaker, category[-1]]+=imgID+','
         idFile.close()
     writeMatrix(subjectCategory, 'subjectCategory')
-    writeStart(str(0)+','+str(0), 'categories')
+    startJSON = {
+        "startingCategoryIndex": 0,
+        "startingIndex":0
+    }
+    startJSONHandlers.writeJSON(startJSON, 'builder/category')
     print('Matrix built!')
 
 def getOverallStatsJSON():
@@ -274,23 +293,6 @@ def writeMatrix(matrix, name):
         matrix.T.to_csv("data/subjectTaker.csv")
     matrix.to_csv("data/%s.csv" %name)
 
-def writeStart(start, startingIndexName):
-    with open('idFiles/startingIndices/%s.txt' %startingIndexName, 'w+') as f:
-        f.write('%s' %start)
-    f.close()
-
-def writeStartJSON(startJSON, path):
-    with open("idFiles/startingIndices/"+path+".json", "w") as fp:
-        json.dump(startJSON , fp) 
-    fp.close()
-
-def getStartJSON(path):
-    startJSON = {}
-    with open('idFiles/startingPoints'+path+".json") as f_in:
-        startJSON = json.load(f_in)
-    f_in.close()
-    return startJSON
-
 """
     Reset the given matrices by writing empty matrices to the csvs with the given names.
 """
@@ -306,11 +308,4 @@ def getMatrix(fileName):
     matrix = pd.read_csv('data/%s.csv' %fileName, index_col=0)
     matrix = matrix.fillna('')
     return matrix
-                             
-def getStart(name):
-    start = ''
-    with open('idFiles/startingIndices/%s.txt' %name) as f:
-        start = f.readlines()[0] 
-    f.close()
-    return start
     

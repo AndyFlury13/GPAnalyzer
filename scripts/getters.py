@@ -1,7 +1,7 @@
 import json, requests
 import endpoints
 import gpWrapper
-from scripts.main import CREDS
+import startJSONHandlers
 import tableConstants
 
 MAX_NUM_PICS = 5200000000
@@ -56,14 +56,21 @@ def get_hd_people_pics(gpRequestHeader):
             res = requests.request("POST", endpoints.MEDIA_ITEMS,  data=json.dumps(payload), headers=gpRequestHeader)
             res = res.json()
             if 'error' in res:
+              errorCode = res['error']['code']
+              if errorCode == 401:
+                _, gpRequestHeader = init_gp_server()
+                res = requests.request("POST", endpoints.MEDIA_ITEMS,  data=json.dumps(payload), headers=gpRequestHeader)
+                res = res.json()
+              else:
                 print('!!!! WARNING: Library request error !!!!')
                 print(res)
+                # END WORKFLOW
                 return
     f.close()
     print('Download complete!')
     return numPics
 
-def get_month_pics(monthEntry, gpRequestHeader):
+def get_month_pics(monthEntry, monthIndex, gpRequestHeader):
     payload = {
       "filters": {
         "dateFilter": {
@@ -107,23 +114,36 @@ def get_month_pics(monthEntry, gpRequestHeader):
             res = requests.request("POST", endpoints.MEDIA_ITEMS,  data=json.dumps(payload), headers=gpRequestHeader)
             res = res.json()
             if 'error' in res:
+              errorCode = res['error']['code']
+              if errorCode == 401:
+                _, gpRequestHeader = init_gp_server()
+                res = requests.request("POST", endpoints.MEDIA_ITEMS,  data=json.dumps(payload), headers=gpRequestHeader)
+                res = res.json()
+              elif errorCode == 429:
+                startJSONHandlers.writeJSON({"month":monthIndex}, "getter/month")
+                # UPDATE WORKFLOW START
+                # END WORKFLOW
+                return
+              else:
                 print('!!!! WARNING: Library request error !!!!')
                 print(res)
+                # END WORKFLOW
                 return
             if 'mediaItems' in res:
                 numPics += len(res['mediaItems'])
-            
     f.close()
+    startJSONHandlers.writeJSON({"month":0}, "getter/month")
     return numPics
 
 def get_all_month_pics(gpRequestHeader):
     print('Downloading pics with monthly filter...')
-    for monthEntry in tableConstants.MONTHS:
-        get_month_pics(monthEntry, gpRequestHeader)
+    startingMonthIndex = startJSONHandlers.getJSON('getter/month')
+    for monthIndex, monthEntry in enumerate(tableConstants.MONTHS[startingMonthIndex:]):
+        get_month_pics(monthEntry, monthIndex+startingMonthIndex, gpRequestHeader)
     print('Download complete!')
         
         
-def get_category_pics(category, gpRequestHeader):
+def get_category_pics(category, categoryIndex, gpRequestHeader):
     categoryLabel = category[0]
     if len(category)>1:
         categoryLabel = category[-1]
@@ -161,16 +181,30 @@ def get_category_pics(category, gpRequestHeader):
             res = requests.request("POST", endpoints.MEDIA_ITEMS,  data=json.dumps(payload), headers=gpRequestHeader)
             res = res.json()
             if 'error' in res:
+              errorCode = res['error']['code']
+              if errorCode == 401:
+                _, gpRequestHeader = init_gp_server()
+                res = requests.request("POST", endpoints.MEDIA_ITEMS,  data=json.dumps(payload), headers=gpRequestHeader)
+                res = res.json()
+              elif errorCode == 429:
+                startJSONHandlers.writeJSON({"categoryStart":categoryIndex}, "getter/category")
+                # UPDATE WORKFLOW START
+                # END WORKFLOW
+                return
+              else:
                 print('!!!! WARNING: Library request error !!!!')
                 print(res)
+                # END WORKFLOW
                 return
             if 'mediaItems' in res:
                 numPics += len(res['mediaItems'])
     f.close()
+    startJSONHandlers.writeJSON({"categoryStart":0}, "getter/category")
     return numPics
     
 def get_all_category_pics(gpRequestHeader):
     print('Downloading pics with category filter...')
-    for category in tableConstants.CATEGORIES:
-        get_category_pics(category, gpRequestHeader)
+    startingCategoryIndex = startJSONHandlers.getJSON('getter/category')
+    for categoryIndex, category in enumerate(tableConstants.CATEGORIES[startingCategoryIndex:]):
+        get_category_pics(category, categoryIndex+startingCategoryIndex, gpRequestHeader)
     print('Download complete!')

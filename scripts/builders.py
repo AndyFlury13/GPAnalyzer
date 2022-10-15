@@ -123,13 +123,16 @@ def processRecognition(res, pictureTaker, matrices, imgID, month=None):
             subject_i += 1
             subject_j = subject_i + 1
 
-def createSubjectMatrices(gpRequestHeader):
+def createSubjectMatrices(gpRequestHeader, MAX_PICS=False):
     picturedWithMatrix, takerSubjectMatrix = getMatrix('picturedWith'), getMatrix('takerSubject')
     overallStats = getOverallStatsJSON()
     print('Building subject-taker and photographed with matrices...')
     idFile = open('idFiles/picIDs.txt', 'r')
-    start = int(getStart("subject"))
-    ids = idFile.readlines()[start:]
+    startJSON = getStartJSON("subject")
+    if MAX_PICS:
+        ids = idFile.readlines()[start:MAX_PICS]
+    else:
+        ids = idFile.readlines()[start:]
     
     for entry in enumerate(ids):
         imgIDNum, imgID = entry[0]+start, entry[1][:-1]
@@ -166,37 +169,45 @@ def randomizeIDs(idString):
     idList = [i for i in idList if i]
     return ','.join(idList)
     
-def createMonthMatrices(gpRequestHeader):
+def createMonthMatrices(gpRequestHeader, MAX_PICS=False):
     pictureBySubjectByMonth = getMatrix('pictureBySubjectByMonth')
     pictureOfSubjectByMonth = getMatrix('pictureOfSubjectByMonth')
     print('Building monthly matrices...')
     start = getStart('months')
     monthStart, lineStart = [int(i) for i in start.split(",")]
     for monthNum, monthEntry in enumerate(tableConstants.MONTHS[monthStart:]):
-        monthIDNum, imgID = monthStart + lineStart, imgID[:-1] # Cut out the EOL token
-        (pictureTaker, url) = getPictureTaker(imgID, gpRequestHeader)
-        if pictureTaker == 'video':
-             continue
-        elif pictureTaker == '429':
-            writeMatrix(pictureBySubjectByMonth, 'pictureBySubjectByMonth')
-            writeMatrix(pictureOfSubjectByMonth, 'pictureOfSubjectByMonth')
-            writeStart(str(monthNum)+','+str(monthIDNum), 'months')
-            return
-        pictureBySubjectByMonth.at[pictureTaker, monthEntry['name']]+=imgID+','
-        try:
-            recognitionRes = recognizeFace(url)
-            matrices = (None, None, None, pictureOfSubjectByMonth)
-            processRecognition(recognitionRes, pictureTaker, matrices, imgID, monthEntry['name'])
-        except Exception as e:
-            print("!!!! WARNING: recognition api call failure in month matrix creation !!!!")
-            print(e)
-            print(recognitionRes)
+        print(monthEntry['name'])
+        idFile = open('idFiles/months/'+monthEntry['name']+'PicIDs.txt', 'r')
+        monthNum += monthStart
+        if MAX_PICS:
+            ids = idFile.readlines()[lineStart:MAX_PICS]
+        else:
+            ids = idFile.readlines()[lineStart:]
+        for monthIDNum, imgID in enumerate(ids):
+            monthIDNum, imgID = monthStart + lineStart, imgID[:-1] # Cut out the EOL token
+            (pictureTaker, url) = getPictureTaker(imgID, gpRequestHeader)
+            if pictureTaker == 'video':
+                continue
+            elif pictureTaker == '429':
+                writeMatrix(pictureBySubjectByMonth, 'pictureBySubjectByMonth')
+                writeMatrix(pictureOfSubjectByMonth, 'pictureOfSubjectByMonth')
+                writeStart(str(monthNum)+','+str(monthIDNum), 'months')
+                return
+            pictureBySubjectByMonth.at[pictureTaker, monthEntry['name']]+=imgID+','
+            try:
+                recognitionRes = recognizeFace(url)
+                matrices = (None, None, None, pictureOfSubjectByMonth)
+                processRecognition(recognitionRes, pictureTaker, matrices, imgID, monthEntry['name'])
+            except Exception as e:
+                print("!!!! WARNING: recognition api call failure in month matrix creation !!!!")
+                print(e)
+                print(recognitionRes)
     writeMatrix(pictureBySubjectByMonth, 'pictureBySubjectByMonth')
     writeMatrix(pictureOfSubjectByMonth, 'pictureOfSubjectByMonth')
     writeStart(str(0)+','+str(0), 'months')
     print('Matrices built!')
         
-def createCategoryMatrix(gpRequestHeader):
+def createCategoryMatrix(gpRequestHeader, MAX_PICS=False):
     subjectCategory = getMatrix('subjectCategory')
     print('Building category matrix...')
     start = getStart('categories')
@@ -204,7 +215,10 @@ def createCategoryMatrix(gpRequestHeader):
     for categoryNum, category in enumerate(tableConstants.CATEGORIES[categoryStart:]):
         idFile = open('idFiles/categories/'+category[-1]+'PicIDs.txt', 'r')
         categoryNum += categoryStart
-        ids = idFile.readlines()[lineStart:]
+        if MAX_PICS:
+            ids = idFile.readlines()[lineStart:MAX_PICS]
+        else:
+            ids = idFile.readlines()[lineStart:]
         for imgIDNum, imgID in enumerate(ids):
             imgIDNum, imgID = imgIDNum + lineStart, imgID[:-1]
             (pictureTaker, _) = getPictureTaker(imgID, gpRequestHeader)
@@ -219,16 +233,16 @@ def createCategoryMatrix(gpRequestHeader):
     writeMatrix(subjectCategory, 'subjectCategory')
     writeStart(str(0)+','+str(0), 'categories')
     print('Matrix built!')
-    
+
 def getOverallStatsJSON():
     overallStats = {}
-    with open('../../scrappyBookFrontend/firebaseShell/data/overallStats.json') as f_in:
+    with open('data/overallStats.json') as f_in:
         overallStats = json.load(f_in)
     f_in.close()
     return overallStats
 
 def writeOverallStatsJSON(overallStats):
-    with open("../../scrappyBookFrontend/firebaseShell/data/overallStats.json", "w") as fp:
+    with open("data/overallStats.json", "w") as fp:
         json.dump(overallStats , fp) 
     fp.close()
 
@@ -257,29 +271,39 @@ def createOverallJSON(gpRequestHeader):
 def writeMatrix(matrix, name):
     matrix = matrix.applymap(randomizeIDs)
     if name == 'takerSubject':
-        matrix.T.to_csv("../../scrappyBookFrontend/firebaseShell/data/subjectTaker.csv")
-    matrix.to_csv("../../scrappyBookFrontend/firebaseShell/data/%s.csv" %name)
+        matrix.T.to_csv("data/subjectTaker.csv")
+    matrix.to_csv("data/%s.csv" %name)
 
 def writeStart(start, startingIndexName):
     with open('idFiles/startingIndices/%s.txt' %startingIndexName, 'w+') as f:
         f.write('%s' %start)
     f.close()
 
+def writeStartJSON(startJSON, path):
+    with open("idFiles/startingIndices/"+path+".json", "w") as fp:
+        json.dump(startJSON , fp) 
+    fp.close()
+
+def getStartJSON(path):
+    startJSON = {}
+    with open('idFiles/startingPoints'+path+".json") as f_in:
+        startJSON = json.load(f_in)
+    f_in.close()
+    return startJSON
+
 """
     Reset the given matrices by writing empty matrices to the csvs with the given names.
 """
-
 def resetMatrix(rowLabels, columnLabels, indexName, fileName):
     matrix = pd.DataFrame('', index=rowLabels, columns=columnLabels)
     matrix.index.name = indexName
-    matrix.to_csv('../../scrappyBookFrontend/firebaseShell/data/%s.csv' %fileName)
+    matrix.to_csv('data/%s.csv' %fileName)
 
 def resetJSON():
     writeOverallStatsJSON(tableConstants.emptyOverallStats)
 
 def getMatrix(fileName):
-    
-    matrix = pd.read_csv('../../scrappyBookFrontend/firebaseShell/data/%s.csv' %fileName, index_col=0)
+    matrix = pd.read_csv('data/%s.csv' %fileName, index_col=0)
     matrix = matrix.fillna('')
     return matrix
                              

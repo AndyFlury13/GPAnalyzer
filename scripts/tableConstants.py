@@ -10,6 +10,9 @@ MONTHS = [
     {'month': 4, 'year':2022, 'name': 'April'}, 
     {'month': 5, 'year':2022, 'name': 'May'}, 
     {'month': 6, 'year':2022, 'name': 'June'}, 
+    {'month': 7, 'year':2022, 'name': 'July'}, 
+    {'month': 8, 'year':2022, 'name': 'August'}, 
+    {'month': 9, 'year':2022, 'name': 'September'}, 
 ]
 
 CATEGORIES = [

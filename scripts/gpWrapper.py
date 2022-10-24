@@ -1,14 +1,13 @@
 import pickle
 import os
-from google_auth_oauthlib.flow import Flow, InstalledAppFlow
-from googleapiclient.discovery import build
+from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
-import requests
+
 
 class GooglePhotosApi:
     def __init__(self,
                  api_name = 'photoslibrary',
-                 client_secret_file= r'./credentials/client_secret.json',
+                 client_secret_file= r'./scripts/credentials/client_secret.json',
                  api_version = 'v1',
                  scopes = ['https://www.googleapis.com/auth/photoslibrary']):
         '''
@@ -26,7 +25,7 @@ class GooglePhotosApi:
         self.client_secret_file = client_secret_file
         self.api_version = api_version
         self.scopes = scopes
-        self.cred_pickle_file = f'./credentials/token_{self.api_name}_{self.api_version}.pickle'
+        self.cred_pickle_file = f'./scripts/credentials/token_{self.api_name}_{self.api_version}.pickle'
 
         self.cred = None
 

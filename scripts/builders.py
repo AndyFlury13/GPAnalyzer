@@ -1,12 +1,11 @@
-import pandas as pd
-import random
 import requests
-import json
+from workflowToolkit import WorkflowSteps
 import tableConstants
 import getters
 import os
 import endpoints
 import startJSONHandlers
+import matrixToolkit
 
 
 """
@@ -14,7 +13,6 @@ import startJSONHandlers
     We can only download the image from baseURL if we have requested
     the url from GP API and make our download request within 60 minutes
 """
-
 def requestIMG(imgID, gpRequestHeader):
     url = 'https://photoslibrary.googleapis.com/v1/mediaItems/'+imgID
     res = requests.request("GET", url, headers=gpRequestHeader)
@@ -25,7 +23,7 @@ def requestIMG(imgID, gpRequestHeader):
 """
 def downloadIMG(url, file_name='imgToRecognize.jpg'):
     downloadResponse = requests.get(url)
-    destination_folder = './downloads/'
+    destination_folder = './scripts/downloads/'
     with open(os.path.join(destination_folder, file_name), 'wb') as f:
         f.write(downloadResponse.content)
         f.close()
@@ -40,13 +38,12 @@ def recognizeFace(url):
     }
 
     files = {
-        'file': open('./downloads/imgToRecognize.jpg', 'rb'),
+        'file': open('./scripts/downloads/imgToRecognize.jpg', 'rb'),
     }
 
     res = requests.post('http://localhost:8000/api/v1/recognition/recognize?face_plugins=landmarks, gender, age', headers=headers, files=files)
     return res.json()
 
-NAMES = ['me', 'girlBoss', 'bugBoy', 'jiusus', 'chimu', 'shirleyWhirley', 'yuppie', 'dumbestKid', 'emily', 'other']
 RECOGNITION_THRESHOLD = .8 ## The similarity above which we allow a recognition
 
 def getPictureTaker(imgID, gpRequestHeader):
@@ -64,9 +61,9 @@ def getPictureTaker(imgID, gpRequestHeader):
         elif errorCode == 429:
             print('GP quota reached. Writing matrices to file...')
             return '429', ''
-            
         else:
-            return 'video', ''
+            
+            return str(errorCode), ''
     if 'photo' in mediaMetadata:
         photo = mediaMetadata['photo']
         if 'cameraModel' in photo:
@@ -124,28 +121,56 @@ def processRecognition(res, pictureTaker, matrices, imgID, month=None):
             subject_i += 1
             subject_j = subject_i + 1
 
-def createSubjectMatrices(gpRequestHeader, MAX_PICS=False):
-    picturedWithMatrix, takerSubjectMatrix = getMatrix('picturedWith'), getMatrix('takerSubject')
-    overallStats = getOverallStatsJSON()
+def subjectWFError():
+    ## Update builder subject start json
+    startJSONHandlers.writeJSON({
+        'startingIndex': 0,
+    }, 'builder/subject')
+
+    ## Update workflow start json
+    startJSONHandlers.writeJSON({
+        'startingStep': WorkflowSteps.ANALYZE_HD_PICS,
+        'totalPicCount': matrixToolkit.getOldTotalPicCount()
+    }, 'workflowStart')
+
+    ## Reset the subject matrices matrix
+    matrixToolkit.resetMatrix(tableConstants.NAMES, tableConstants.NAMES, 'client', 'takerSubject')
+    matrixToolkit.resetMatrix(tableConstants.NAMES, tableConstants.NAMES, 'client', 'subjectTaker')
+    matrixToolkit.resetMatrix(tableConstants.NAMES, tableConstants.NAMES, 'client', 'picturedWith')
+    matrixToolkit.resetOverallStatsJSON()
+
+def createSubjectMatrices(gpRequestHeader):
+    maxPics=False
+    picturedWithMatrix, takerSubjectMatrix = matrixToolkit.getMatrix('picturedWith'), matrixToolkit.getMatrix('takerSubject')
+    overallStats = matrixToolkit.getOverallStatsJSON()
     print('Building subject-taker and photographed with matrices...')
-    idFile = open('idFiles/picIDs.txt', 'r')
+    idFile = open('./scripts/idFiles/picIDs.txt', 'r')
     startJSON = startJSONHandlers.getJSON("builders/subject")
     start = startJSON['startingIndex']
-    if MAX_PICS:
-        ids = idFile.readlines()[start:MAX_PICS]
+    if maxPics:
+        ids = idFile.readlines()[start:maxPics]
     else:
         ids = idFile.readlines()[start:]
     
     for entry in enumerate(ids):
         imgIDNum, imgID = entry[0]+start, entry[1][:-1]
-        (pictureTaker, url) = getPictureTaker(imgID, gpRequestHeader) # Cut out the EOL token
-        if pictureTaker == '429':
-            writeMatrix(picturedWithMatrix, 'picturedWith')
-            writeMatrix(takerSubjectMatrix, 'takerSubject')
+        (pictureTaker, url) = getPictureTaker(imgID, gpRequestHeader)
+        if pictureTaker == 429:
+            matrixToolkit.writeMatrix(picturedWithMatrix, 'picturedWith')
+            matrixToolkit.writeMatrix(takerSubjectMatrix, 'takerSubject')
+
             startJSONHandlers.writeJSON({'startingIndex': imgIDNum}, 'builder/subject')
-            return
-        if pictureTaker == 'video':
+            startJSONHandlers.writeJSON({
+                'startingStep': WorkflowSteps.ANALYZE_HD_PICS,
+                'totalPicCount':matrixToolkit.getOldTotalPicCount()
+            },
+            'workflowStart')
+            return WorkflowSteps.ERROR
+        elif pictureTaker == 'video':
             continue
+        elif isinstance(pictureTaker, int):
+            subjectWFError()
+            return WorkflowSteps.ERROR
         else:
             try:
                 recognitionRes = recognizeFace(url)
@@ -155,157 +180,188 @@ def createSubjectMatrices(gpRequestHeader, MAX_PICS=False):
                 print("!!!! WARNING: recognition api call failure in subject matrices creation !!!!")
                 print(e)
                 print(recognitionRes)
+                subjectWFError()
+                return WorkflowSteps.ERROR
         imgIDNum += 1
     idFile.close()
     subjectTakerMatrix = takerSubjectMatrix.T
     subjectTakerMatrix.index.name = 'client'
-    writeMatrix(picturedWithMatrix, 'picturedWith')
-    writeMatrix(takerSubjectMatrix, 'takerSubject')
-    writeMatrix(subjectTakerMatrix, 'subjectTaker')
+    matrixToolkit.writeMatrix(picturedWithMatrix, 'picturedWith')
+    matrixToolkit.writeMatrix(takerSubjectMatrix, 'takerSubject')
+    matrixToolkit.writeMatrix(subjectTakerMatrix, 'subjectTaker')
     startJSONHandlers.writeJSON({'startingIndex':0}, 'builder/subject')
     print('Matrices built!')
+    return WorkflowSteps.GET_MONTH_PICS
 
-def randomizeIDs(idString):
-    idList = idString.split(",")
-    random.shuffle(idList)
-    idList = [i for i in idList if i]
-    return ','.join(idList)
+
+def monthWFError():
+    ## Update builder month start json
+    startJSONHandlers.writeJSON({
+        'startingMonthIndex': 0,
+        'startingIndex':0
+    }, 'builder/month')
+
+    ## Update workflow start json
+    startJSONHandlers.writeJSON({
+        'startingStep': WorkflowSteps.ANALYZE_MONTH_PICS,
+        'totalPicCount': matrixToolkit.getOldTotalPicCount()
+    }, 'workflowStart')
+
+    ## Reset month matrices
+    matrixToolkit.resetMatrix(tableConstants.NAMES, [month['name'] for month in tableConstants.MONTHS], 'client', 'pictureBySubjectByMonth')
+    matrixToolkit.resetMatrix(tableConstants.NAMES, [month['name'] for month in tableConstants.MONTHS], 'client', 'pictureOfSubjectByMonth')
     
-def createMonthMatrices(gpRequestHeader, MAX_PICS=False):
-    pictureBySubjectByMonth = getMatrix('pictureBySubjectByMonth')
-    pictureOfSubjectByMonth = getMatrix('pictureOfSubjectByMonth')
+def createMonthMatrices(gpRequestHeader):
+    pictureBySubjectByMonth = matrixToolkit.getMatrix('pictureBySubjectByMonth')
+    pictureOfSubjectByMonth = matrixToolkit.getMatrix('pictureOfSubjectByMonth')
     print('Building monthly matrices...')
     startJSON = startJSONHandlers.getJSON("builder/month")
     monthStart, lineStart = startJSON['startingMonthIndex'], startJSON['startingIndex']
     for monthNum, monthEntry in enumerate(tableConstants.MONTHS[monthStart:]):
         print(monthEntry['name'])
-        idFile = open('idFiles/months/'+monthEntry['name']+'PicIDs.txt', 'r')
+        idFile = open('./scripts/idFiles/months/'+monthEntry['name']+'PicIDs.txt', 'r')
         monthNum += monthStart
-        if MAX_PICS:
-            ids = idFile.readlines()[lineStart:MAX_PICS]
-        else:
-            ids = idFile.readlines()[lineStart:]
+        ids = idFile.readlines()[lineStart:]
         for monthIDNum, imgID in enumerate(ids):
-            monthIDNum, imgID = monthStart + lineStart, imgID[:-1] # Cut out the EOL token
+            monthIDNum, imgID = monthIDNum + lineStart, imgID[:-1] # Cut out the EOL token
             (pictureTaker, url) = getPictureTaker(imgID, gpRequestHeader)
             if pictureTaker == 'video':
                 continue
             elif pictureTaker == '429':
-                writeMatrix(pictureBySubjectByMonth, 'pictureBySubjectByMonth')
-                writeMatrix(pictureOfSubjectByMonth, 'pictureOfSubjectByMonth')
-                startJSON = {
+                matrixToolkit.writeMatrix(pictureBySubjectByMonth, 'pictureBySubjectByMonth')
+                matrixToolkit.writeMatrix(pictureOfSubjectByMonth, 'pictureOfSubjectByMonth')
+
+                ## Write the month start JSON
+                startJSONHandlers.writeJSON({
                     "startingMonthIndex":monthNum,
                     "startingIndex":monthIDNum
-                }
-                startJSONHandlers.writeJSON(startJSON, 'builder/months')
-                return
-            pictureBySubjectByMonth.at[pictureTaker, monthEntry['name']]+=imgID+','
-            try:
-                recognitionRes = recognizeFace(url)
-                matrices = (None, None, None, pictureOfSubjectByMonth)
-                processRecognition(recognitionRes, pictureTaker, matrices, imgID, monthEntry['name'])
-            except Exception as e:
-                print("!!!! WARNING: recognition api call failure in month matrix creation !!!!")
-                print(e)
-                print(recognitionRes)
-    writeMatrix(pictureBySubjectByMonth, 'pictureBySubjectByMonth')
-    writeMatrix(pictureOfSubjectByMonth, 'pictureOfSubjectByMonth')
+                }, 'builder/month')
+                
+                ## Write the wf start JSON
+                startJSONHandlers.writeJSON({
+                    'startingStep': WorkflowSteps.ANALYZE_MONTH_PICS,
+                    'totalPicCount':matrixToolkit.getOldTotalPicCount()
+                },
+                'workflowStart')
+
+                return WorkflowSteps.ERROR
+            elif isinstance(pictureTaker, int):
+                print('Error code:', pictureTaker)
+                monthWFError()
+                return WorkflowSteps.ERROR
+            else:
+                pictureBySubjectByMonth.at[pictureTaker, monthEntry['name']]+=imgID+','
+                try:
+                    recognitionRes = recognizeFace(url)
+                    matrices = (None, None, None, pictureOfSubjectByMonth)
+                    processRecognition(recognitionRes, pictureTaker, matrices, imgID, monthEntry['name'])
+                except Exception as e:
+                    print("!!!! WARNING: recognition api call failure in month matrix creation !!!!")
+                    print(e)
+                    print(recognitionRes)
+                    monthWFError()
+                    return WorkflowSteps.ERROR
+
+    matrixToolkit.writeMatrix(pictureBySubjectByMonth, 'pictureBySubjectByMonth')
+    matrixToolkit.writeMatrix(pictureOfSubjectByMonth, 'pictureOfSubjectByMonth')
     startJSON = {
         "startingMonthIndex":0,
         "startingIndex":0
     }
     startJSONHandlers.writeJSON(startJSON, 'builder/month')
     print('Matrices built!')
+    return WorkflowSteps.GET_CATEGORY_PICS
+
+def categoryWFError():
+    matrixToolkit.resetMatrix(tableConstants.NAMES, [category[-1] for category in tableConstants.CATEGORIES], 'client', 'subjectCategory')
+
+    startJSONHandlers.writeJSON({
+        "startingCategoryIndex": 0,
+        "startingIndex":0
+    }, 'builder/category')
+
+    ## Update WF start JSON
+    startJSONHandlers.writeJSON({
+        "startingStep": WorkflowSteps.ANALYZE_CATEGORY_PICS,
+        "totalPicCount": matrixToolkit.getOldTotalPicCount()
+    }, 'workflowStart')
+
         
-def createCategoryMatrix(gpRequestHeader, MAX_PICS=False):
-    subjectCategory = getMatrix('subjectCategory')
+def createCategoryMatrix(gpRequestHeader):
+    subjectCategory = matrixToolkit.getMatrix('subjectCategory')
     print('Building category matrix...')
     startJSON = startJSONHandlers.getJSON('builder/category')
     categoryStart, lineStart = startJSON["startingCategoryIndex"], startJSON["startingIndex"]
 
     for categoryNum, category in enumerate(tableConstants.CATEGORIES[categoryStart:]):
-        idFile = open('idFiles/categories/'+category[-1]+'PicIDs.txt', 'r')
+        idFile = open('./scripts/idFiles/categories/'+category[-1]+'PicIDs.txt', 'r')
         categoryNum += categoryStart
-        if MAX_PICS:
-            ids = idFile.readlines()[lineStart:MAX_PICS]
-        else:
-            ids = idFile.readlines()[lineStart:]
+        ids = idFile.readlines()[lineStart:]
         for imgIDNum, imgID in enumerate(ids):
-            imgIDNum, imgID = imgIDNum + lineStart, imgID[:-1]
+            imgIDNum, imgID = imgIDNum + lineStart, imgID[:-1] #Parse out EOL token
             (pictureTaker, _) = getPictureTaker(imgID, gpRequestHeader)
             if pictureTaker == 'video':
                  continue
             elif pictureTaker == '429':
-                writeMatrix(subjectCategory, 'subjectCategory')
-                startJSON = {
+                matrixToolkit.writeMatrix(subjectCategory, 'subjectCategory')
+
+                ## Update cateogry start JSON
+                startJSONHandlers.writeJSON({
                     "startingCategoryIndex": categoryNum,
                     "startingIndex":imgIDNum
-                }
-                startJSONHandlers.writeJSON(startJSON, 'builder/category')
-                return
+                }, 'builder/category')
+
+                ## Update WF start JSON
+                startJSONHandlers.writeJSON({
+                    "startingStep": WorkflowSteps.ANALYZE_CATEGORY_PICS,
+                    "totalPicCount": matrixToolkit.getOldTotalPicCount()
+                }, 'workflowStart')
+
+                return WorkflowSteps.ERROR
+            elif isinstance(pictureTaker, int):
+                categoryWFError(categoryNum, imgIDNum)
+                return WorkflowSteps.ERROR
             subjectCategory.at[pictureTaker, category[-1]]+=imgID+','
         idFile.close()
-    writeMatrix(subjectCategory, 'subjectCategory')
+    matrixToolkit.writeMatrix(subjectCategory, 'subjectCategory')
     startJSON = {
         "startingCategoryIndex": 0,
         "startingIndex":0
     }
     startJSONHandlers.writeJSON(startJSON, 'builder/category')
     print('Matrix built!')
+    return WorkflowSteps.FINISH_OVERALL_STATS
 
-def getOverallStatsJSON():
-    overallStats = {}
-    with open('data/overallStats.json') as f_in:
-        overallStats = json.load(f_in)
-    f_in.close()
-    return overallStats
-
-def writeOverallStatsJSON(overallStats):
-    with open("data/overallStats.json", "w") as fp:
-        json.dump(overallStats , fp) 
-    fp.close()
-
-
-def createOverallJSON(gpRequestHeader):
+def getTotalPicCount(gpRequestHeader):
     try:
         res = requests.request("GET", endpoints.GET_LIBRARIES, headers=gpRequestHeader)
         res.json()
         albumID = res.json()['albums'][1]['id']
+        res = requests.request("GET", endpoints.GET_LIBRARIES+'/'+albumID, headers=gpRequestHeader)
+        res = res.json()
     except:
         print('!!!! WARNING: Library request error !!!!') 
         print(res)
 
-    res = requests.request("GET", endpoints.GET_LIBRARIES+'/'+albumID, headers=gpRequestHeader)
-    print(res)
-    res = res.json()
-    totalPictures = int(res['mediaItemsCount'])
-    overallCounts = getOverallStatsJSON()
+        startJSONHandlers.writeJSON({
+            'startingStep':WorkflowSteps.FINISH_OVERALL_STATS,
+            'totalPicCount': matrixToolkit.getOldTotalPicCount()
+        }, 'workflowStart')
+
+        return WorkflowSteps.ERROR
+    return int(res['mediaItemsCount'])
+
+def finishOverallStatsJSON(gpRequestHeader):
+    print("Requesting total pic count...")
+    totalPictures = getTotalPicCount(gpRequestHeader)
+    if totalPictures.value == WorkflowSteps.ERROR.value:
+        return WorkflowSteps.ERROR
+    overallCounts = matrixToolkit.getOverallStatsJSON()
     overallCounts['total'] = totalPictures
-    writeOverallStatsJSON(overallCounts)
-
-"""
-    Write the given matrices to csvs with the given names, and write the next run's starting
-    index to the file with the given startingIndexName.
-"""
-def writeMatrix(matrix, name):
-    matrix = matrix.applymap(randomizeIDs)
-    if name == 'takerSubject':
-        matrix.T.to_csv("data/subjectTaker.csv")
-    matrix.to_csv("data/%s.csv" %name)
-
-"""
-    Reset the given matrices by writing empty matrices to the csvs with the given names.
-"""
-def resetMatrix(rowLabels, columnLabels, indexName, fileName):
-    matrix = pd.DataFrame('', index=rowLabels, columns=columnLabels)
-    matrix.index.name = indexName
-    matrix.to_csv('data/%s.csv' %fileName)
-
-def resetJSON():
-    writeOverallStatsJSON(tableConstants.emptyOverallStats)
-
-def getMatrix(fileName):
-    matrix = pd.read_csv('data/%s.csv' %fileName, index_col=0)
-    matrix = matrix.fillna('')
-    return matrix
-    
+    matrixToolkit.writeOverallStatsJSON(overallCounts)
+    print("Overall stats JSON created!")
+    startJSONHandlers.writeJSON({
+        'startingStep':WorkflowSteps.GET_HD_PICS,
+        'totalPicCount': totalPictures
+    }, 'workflowStart')
+    return WorkflowSteps.COMPLETE
